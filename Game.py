@@ -18,7 +18,7 @@ import rfit
 
 #%% [markdown]
 # ## 2. Loading the Dataset
-games_df = pd.read_csv('games.csv')
+games_df = pd.read_csv('games.csv', index_col=False)
 
 # Display the first 5 rows of the dataset to get an overview of its structure and content
 print(games_df.head())
@@ -48,20 +48,21 @@ print(games_df.describe())
 # Define the columns to remove from the dataset
 removed_columns = ['AppID', 'Screenshots', 'Reviews', 'Header image', 'Website', 'Support url', 
                    'Support email', 'Metacritic url', 'Notes', 'Average playtime two weeks', 
-                   'Median playtime two weeks', 'Median playtime forever', 'Movies', 'Release date',
-                   'Score rank', 'Tags']
+                   'Median playtime two weeks', 'Median playtime forever', 'Movies',
+                   'Score rank']
 
 # Drop these columns from the dataset
 games_df_cleaned = games_df.drop(columns=removed_columns).copy()
 
 # # Print the "Genres" column to inspect its content before further processing.
-print(games_df_cleaned["Genres"])
+print(games_df_cleaned["Tags"])
 
 # # Convert all genre names to lowercase for consistency (this helps in grouping similar genres later).
-games_df_cleaned["Genres"] = games_df_cleaned["Genres"].str.lower()
+games_df_cleaned["Tags"] = games_df_cleaned["Tags"].str.lower()
 
 games_df_cleaned = games_df_cleaned.dropna(subset=['Categories'])
 games_df_cleaned = games_df_cleaned.dropna(subset=['Genres'])
+games_df_cleaned = games_df_cleaned.dropna(subset=['Tags'])
 
 games_df_cleaned['Developers'].fillna('Unknown', inplace=True)
 games_df_cleaned['Publishers'].fillna('Unknown', inplace=True)
@@ -72,4 +73,3 @@ games_df_cleaned['Publishers'].fillna('Unknown', inplace=True)
 # After cleaning, check if there are any remaining missing values in the cleaned dataset.
 print(games_df_cleaned.isnull().sum())
 games_df_cleaned.shape
-# %%
