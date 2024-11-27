@@ -245,6 +245,9 @@ print(top_genre_counts)
 
 # %%
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+
 
 # Initialize a dictionary to store results for each genre
 genre_accuracy_results = {}
@@ -291,3 +294,5 @@ for genre, results in genre_accuracy_results.items():
     print(f"{genre}: Accuracy = {results['accuracy'] * 100:.2f}%")
 
 
+
+# %%
