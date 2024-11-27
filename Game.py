@@ -73,3 +73,38 @@ games_df_cleaned['Publishers'].fillna('Unknown', inplace=True)
 # After cleaning, check if there are any remaining missing values in the cleaned dataset.
 print(games_df_cleaned.isnull().sum())
 games_df_cleaned.shape
+
+
+# %% [markdown]
+
+### SMART Question 2: How has the release year impacted the estimated number of owners for games on Steam, and are games released within the last five years have more estimated number of owners on average?
+
+from datetime import datetime
+
+# Convert 'Release date' and extract the year
+games_df_cleaned['Release_Date'] = pd.to_datetime(games_df_cleaned['Release date'], errors='coerce')
+games_df_cleaned['Release Year'] = games_df_cleaned['Release_Date'].dt.year
+
+# Calculate average from 'Estimated owners'
+games_df_cleaned['Estimated Owners'] = games_df_cleaned['Estimated owners'].apply(lambda x: np.mean([int(i.replace(',', '')) for i in x.split(' - ')]) if isinstance(x, str) else np.nan)
+yearly_ownership = games_df_cleaned.groupby('Release Year')['Estimated Owners'].agg(['mean', 'count']).reset_index()
+
+# Remove year 2025 from analysis
+yearly_ownership = yearly_ownership[yearly_ownership['Release Year'] < 2025]
+
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+plt.bar(yearly_ownership['Release Year'], yearly_ownership['mean'])
+plt.title('Average Estimated Owners by Release Year')
+plt.xlabel('Release Year')
+plt.ylabel('Average Estimated Owners')
+
+plt.subplot(1, 2, 2)
+plt.plot(yearly_ownership['Release Year'], yearly_ownership['count'], marker='o')
+plt.title('Number of Games Released by Year')
+plt.xlabel('Release Year')
+plt.ylabel('Number of Games')
+
+plt.tight_layout()
+plt.show()
+
