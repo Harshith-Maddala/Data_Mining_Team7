@@ -63,11 +63,8 @@ As part of our project, we provide compelling visualizations to bring the data t
 ---
 
 ## 🤝 Meet the Team  
-
-- **Aditya Kanbargi**  
-- **Harshith Maddala**  
-- **Neeraj Shashikant Magadum**  
-- **Sanjana Kadambe Muralidhar**  
+| **Aditya Kanbargi** | **Harshith Maddala** | **Neeraj Shashikant Magadum** | **Sanjana Kadambe Muralidhar** |
+|----------------------|-----------------|---------------|-----------------|
 
 We’re a group of data enthusiasts exploring the intersection of gaming and analytics. Let’s decode Steam’s gaming ecosystem together!
 
