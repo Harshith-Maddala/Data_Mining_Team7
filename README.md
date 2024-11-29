@@ -35,7 +35,7 @@ Our project tackles the following **S.M.A.R.T. (Specific, Measurable, Achievable
 ---
 
 ## 📂 Dataset Source  
-Our analysis is powered by the **Steam Game Dataset** available on [Kaggle](https://www.kaggle.com). The dataset includes rich information about game metadata, pricing, player statistics, and more.
+Our analysis is powered by the **Steam Game Dataset** available on [Kaggle](https://www.kaggle.com/datasets/fronkongames/steam-games-dataset). The dataset includes rich information about game metadata, pricing, player statistics, and more.
 
 ---
 
@@ -62,38 +62,15 @@ As part of our project, we provide compelling visualizations to bring the data t
 
 ---
 
-## 🖇️ Collaboration  
-
-Our team believes in **open collaboration**. Contributions are welcome!  
-Feel free to:
-- Fork this repository  
-- Open an issue  
-- Submit a pull request  
-
----
-
 ## 🤝 Meet the Team  
 
 - **Aditya Kanbargi**  
-- **Annie Cheng**  
-- **Jahnavi V**  
-- **Sanjana K M**  
+- **Harshith Maddala**  
+- **Neeraj Shashikant Magadum**  
+- **Sanjana Kadambe Muralidhar**  
 
 We’re a group of data enthusiasts exploring the intersection of gaming and analytics. Let’s decode Steam’s gaming ecosystem together!
 
 ---
-
-## 📬 Questions or Feedback?
-
-Drop us a line at **team7steam@gmail.com** or create an issue in this repository. We’d love to hear your thoughts!
-
----
-
-## 🔗 Quick Links
-
-- [GitHub Repo](https://github.com/Team7/SteamGameAnalysis)  
-- [Dataset on Kaggle](https://www.kaggle.com)  
-- [Team Wiki](https://github.com/Team7/SteamGameAnalysis/wiki)  
-
 Let’s hit start and level up! 🎮✨
 
