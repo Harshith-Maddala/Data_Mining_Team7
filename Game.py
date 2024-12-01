@@ -151,4 +151,14 @@ plt.gca().yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):
 plt.tight_layout()
 plt.show()
 
+# %% One-way Anova Test
+from scipy.stats import f_oneway
 
+anova_data = games_df_cleaned[['Release Year', 'Estimated Owners']].dropna()
+owners_by_year = [group['Estimated Owners'].values for year, group in anova_data.groupby('Release Year')]
+
+f_stat, p_value = f_oneway(*owners_by_year)
+
+print("One-Way ANOVA Test Results:")
+print(f"F-statistic: {f_stat:.2f}")
+print(f"P-value: {p_value:.12f}")
