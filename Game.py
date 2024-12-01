@@ -97,5 +97,69 @@ games_df_cleaned.drop(columns=['Tags'], inplace=True)
 
 # updated DataFrame
 games_df_cleaned.head()
-# %%
+# %% [markdown]
+
+### Spliiting and Exploding columns
+#
+#### There are multiple values in 'Categories' and 'Genres' columns, let's split and explode them into multiple rows. 
+
+games_df_cleaned['Categories'] = games_df_cleaned['Categories'].str.split(',')
+games_df_cleaned['Genres'] = games_df_cleaned['Genres'].str.split(',')
+
+df_exploded = games_df_cleaned.explode('Categories').explode('Genres').reset_index(drop=True)
+print(df_exploded)
+
+df_exploded.head()
+# %% [markdown]
+
+### Basic statistics of Numerical Columns
+print("Basic Statistics of Numerical Columns:")
+print(games_df_cleaned.describe())
+
+
+# %% [markdown]
+
+### Let's see the distribution of Peak CCU
+# Log Transformation (to reduce skewness)
+games_df_cleaned['Log_Peak_CCU'] = np.log1p(games_df_cleaned['Peak CCU'])
+
+plt.figure(figsize=(12, 6))
+upper_limit = np.percentile(games_df_cleaned['Log_Peak_CCU'], 95)
+
+sns.histplot(games_df_cleaned['Log_Peak_CCU'], kde=True, bins=50, color='steelblue', alpha=0.8)
+plt.title("Log-Transformed Distribution of Peak Concurrent Users (CCU)", fontsize=16)
+plt.xlabel("Log(Peak CCU)", fontsize=12)
+plt.ylabel("Frequency", fontsize=12)
+plt.grid(color='gray', linestyle='--', linewidth=0.5)
+plt.xlim(0, upper_limit)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.show()
+
+
+### Categories distribution
+
+# Counting the occurrences of each category
+category_counts = df_exploded['Categories'].value_counts()
+
+# Plotting the pie chart
+# Grouping smaller categories into 'Other'
+threshold = 0.03 * category_counts.sum()
+filtered_categories = category_counts[category_counts > threshold]
+other_sum = category_counts[category_counts <= threshold].sum()
+
+# Adding 'Other' to the filtered categories
+filtered_categories['Other'] = other_sum
+
+plt.figure(figsize=(8, 8))
+plt.pie(
+    filtered_categories,
+    labels=filtered_categories.index,
+    autopct='%1.1f%%',
+    startangle=90,
+    colors=sns.color_palette('pastel'),
+    wedgeprops={'edgecolor': 'black'}
+)
+plt.title("Distribution of Categories", fontsize=16)
+plt.show()
 
