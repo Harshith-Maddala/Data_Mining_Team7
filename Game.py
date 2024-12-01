@@ -75,17 +75,27 @@ print(games_df_cleaned.isnull().sum())
 games_df_cleaned.shape
 
 games_df_cleaned.to_csv("games_df_cleaned.csv")
-
-games_df_cleaned.head()
 # %% [markdown] 
 
 ## Which games and game categories (e.g., single-player, multiplayer) consistently reach the highest peak concurrent users, and does this trend differ significantly across genres and game prices?
-## Interchanging column names 
+
+## Interchanging column names for appropriateness
 col_names = list(games_df_cleaned.columns)
 print(col_names)
 col_names[-1], col_names[-2] = col_names[-2], col_names[-1]
 games_df_cleaned.columns = col_names
 
-games_df_cleaned.head()
+# Rearranging some columns
+# Moving data from 'Publishers' to 'Developers'
+games_df_cleaned['Developers'] = games_df_cleaned['Publishers']
 
+# Moving data from 'Categories' to 'Publishers'
+games_df_cleaned['Publishers'] = games_df_cleaned['Categories']
+
+# Moving data from 'Tags' to 'Categories' and then dropping 'Tags'
+games_df_cleaned['Categories'] = games_df_cleaned['Tags']
+games_df_cleaned.drop(columns=['Tags'], inplace=True)
+
+# updated DataFrame
+games_df_cleaned.head()
 # %%
