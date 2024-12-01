@@ -73,3 +73,19 @@ games_df_cleaned['Publishers'].fillna('Unknown', inplace=True)
 # After cleaning, check if there are any remaining missing values in the cleaned dataset.
 print(games_df_cleaned.isnull().sum())
 games_df_cleaned.shape
+
+games_df_cleaned.to_csv("games_df_cleaned.csv")
+
+games_df_cleaned.head()
+# %% [markdown] 
+
+## Which games and game categories (e.g., single-player, multiplayer) consistently reach the highest peak concurrent users, and does this trend differ significantly across genres and game prices?
+## Interchanging column names 
+col_names = list(games_df_cleaned.columns)
+print(col_names)
+col_names[-1], col_names[-2] = col_names[-2], col_names[-1]
+games_df_cleaned.columns = col_names
+
+games_df_cleaned.head()
+
+# %%
