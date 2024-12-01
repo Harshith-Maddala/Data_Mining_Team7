@@ -72,4 +72,19 @@ games_df_cleaned['Publishers'].fillna('Unknown', inplace=True)
 # After cleaning, check if there are any remaining missing values in the cleaned dataset.
 print(games_df_cleaned.isnull().sum())
 games_df_cleaned.shape
+
+# %%
+
+games_df_cleaned['Genres'] = games_df_cleaned['Genres'].str.split(',')
+games_df_cleaned['Genres'] = games_df_cleaned['Genres'].apply(lambda x: [a.lower().title() for a in x])
+
+unique_genres = set()
+for genres in games_df_cleaned['Genres']:
+    unique_genres.update(genres)
+    
+len(unique_genres)
+
+
+
+
 # %%
