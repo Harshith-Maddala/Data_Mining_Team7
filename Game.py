@@ -67,6 +67,12 @@ games_df_cleaned = games_df_cleaned.dropna(subset=['Tags'])
 games_df_cleaned['Developers'].fillna('Unknown', inplace=True)
 games_df_cleaned['Publishers'].fillna('Unknown', inplace=True)
 
+## Interchanging column names for appropriateness
+col_names = list(games_df_cleaned.columns)
+print(col_names)
+col_names[-1], col_names[-2] = col_names[-2], col_names[-1]
+games_df_cleaned.columns = col_names
+
 # %% [markdown]
 # ## 6. Final Check for Missing Values After Cleaning
 
@@ -76,14 +82,7 @@ games_df_cleaned.shape
 
 games_df_cleaned.to_csv("games_df_cleaned.csv")
 # %% [markdown] 
-
 ## Which games and game categories (e.g., single-player, multiplayer) consistently reach the highest peak concurrent users, and does this trend differ significantly across genres and game prices?
-
-## Interchanging column names for appropriateness
-col_names = list(games_df_cleaned.columns)
-print(col_names)
-col_names[-1], col_names[-2] = col_names[-2], col_names[-1]
-games_df_cleaned.columns = col_names
 
 # Rearranging some columns
 # Moving data from 'Publishers' to 'Developers'
@@ -99,3 +98,4 @@ games_df_cleaned.drop(columns=['Tags'], inplace=True)
 # updated DataFrame
 games_df_cleaned.head()
 # %%
+
