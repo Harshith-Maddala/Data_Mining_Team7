@@ -5,7 +5,6 @@
 # ### Date: 17 Nov
 #
 # 
-
 #%%[markdown]
 # ## 1. Importing Required Libraries
 
@@ -97,19 +96,19 @@ games_df_cleaned.drop(columns=['Tags'], inplace=True)
 
 # updated DataFrame
 games_df_cleaned.head()
+
 # %% [markdown]
 
-### Spliiting and Exploding columns
+### Splitting and Exploding columns
 #
 #### There are multiple values in 'Categories' and 'Genres' columns, let's split and explode them into multiple rows. 
-
 games_df_cleaned['Categories'] = games_df_cleaned['Categories'].str.split(',')
 games_df_cleaned['Genres'] = games_df_cleaned['Genres'].str.split(',')
 
-df_exploded = games_df_cleaned.explode('Categories').explode('Genres').reset_index(drop=True)
-print(df_exploded)
+games_df_cleaned = games_df_cleaned.explode('Categories').explode('Genres').reset_index(drop=True)
+games_df_cleaned.head()
 
-df_exploded.head()
+
 # %% [markdown]
 
 ### Basic statistics of Numerical Columns
@@ -120,46 +119,74 @@ print(games_df_cleaned.describe())
 # %% [markdown]
 
 ### Let's see the distribution of Peak CCU
-# Log Transformation (to reduce skewness)
-games_df_cleaned['Log_Peak_CCU'] = np.log1p(games_df_cleaned['Peak CCU'])
+### Aggregate stats for peak ccu by categories
+category_peak_ccu_stats = games_df_cleaned.groupby('Categories')['Peak CCU'].agg(['mean', 'median', 'max', 'sum', 'count']).reset_index()
+category_peak_ccu_stats = category_peak_ccu_stats.sort_values(by='mean', ascending=False)
+print(category_peak_ccu_stats.head(10))
 
+# Aggregate statistics for Peak CCU by Genres
+genre_peak_ccu_stats = games_df_cleaned.groupby('Genres')['Peak CCU'].agg(['mean', 'median', 'max', 'sum', 'count']).reset_index()
+genre_peak_ccu_stats = genre_peak_ccu_stats.sort_values(by='mean', ascending=False)
+print(genre_peak_ccu_stats.head(10))
+
+# %% [markdown]
+
+#### Top Categories by Average peak CCU
+
+top_categories = category_peak_ccu_stats.nlargest(10, 'mean')
+
+# Plotting
 plt.figure(figsize=(12, 6))
-upper_limit = np.percentile(games_df_cleaned['Log_Peak_CCU'], 95)
-
-sns.histplot(games_df_cleaned['Log_Peak_CCU'], kde=True, bins=50, color='steelblue', alpha=0.8)
-plt.title("Log-Transformed Distribution of Peak Concurrent Users (CCU)", fontsize=16)
-plt.xlabel("Log(Peak CCU)", fontsize=12)
-plt.ylabel("Frequency", fontsize=12)
-plt.grid(color='gray', linestyle='--', linewidth=0.5)
-plt.xlim(0, upper_limit)
-plt.xticks(fontsize=10)
-plt.yticks(fontsize=10)
+sns.barplot(data=top_categories, x='Categories', y='mean', palette='viridis')
+plt.title('Top 10 Categories by Average Peak CCU', fontsize=16)
+plt.xlabel('Categories', fontsize=12)
+plt.ylabel('Average Peak CCU', fontsize=12)
+plt.xticks(rotation=45)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
 plt.show()
 
 
-### Categories distribution
+#### Top Genres by Average Peak CCU
 
-# Counting the occurrences of each category
-category_counts = df_exploded['Categories'].value_counts()
+top_genres = genre_peak_ccu_stats.nlargest(10, 'mean')
 
-# Plotting the pie chart
-# Grouping smaller categories into 'Other'
-threshold = 0.03 * category_counts.sum()
-filtered_categories = category_counts[category_counts > threshold]
-other_sum = category_counts[category_counts <= threshold].sum()
+# Plotting
+plt.figure(figsize=(12, 6))
+sns.barplot(data=top_genres, x='Genres', y='mean', palette='magma')
+plt.title('Top 10 Genres by Average Peak CCU', fontsize=16)
+plt.xlabel('Genres', fontsize=12)
+plt.ylabel('Average Peak CCU', fontsize=12)
+plt.xticks(rotation=45)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
 
-# Adding 'Other' to the filtered categories
-filtered_categories['Other'] = other_sum
+#### Distribution of peak ccu across all games
 
-plt.figure(figsize=(8, 8))
-plt.pie(
-    filtered_categories,
-    labels=filtered_categories.index,
-    autopct='%1.1f%%',
-    startangle=90,
-    colors=sns.color_palette('pastel'),
-    wedgeprops={'edgecolor': 'black'}
-)
-plt.title("Distribution of Categories", fontsize=16)
+games_df_cleaned['Log_Peak_CCU'] = np.log1p(games_df_cleaned['Peak CCU'])
+
+plt.figure(figsize=(10, 6))
+sns.histplot(games_df_cleaned['Log_Peak_CCU'], bins=50, kde=True, color='steelblue', alpha=0.8)
+plt.title("Log-Transformed Distribution of Peak CCU", fontsize=16)
+plt.xlabel("Log(Peak CCU)", fontsize=12)
+plt.ylabel("Frequency", fontsize=12)
+plt.grid(color='gray', linestyle='--', linewidth=0.5)
+plt.show()
+
+#### Top 10 games by Peak CCU
+
+
+top_10_games = games_df_cleaned.groupby('Name').agg({'Peak CCU': 'max'}).nlargest(10, 'Peak CCU').reset_index()
+top_10_games = top_10_games.merge(games_df_cleaned[['Name', 'Release date']], on='Name', how='left').drop_duplicates()
+
+# Plotting
+plt.figure(figsize=(12, 8))
+sns.barplot(data=top_10_games, y='Name', x='Peak CCU', palette='cubehelix')
+plt.title('Top 10 Games by Peak CCU', fontsize=16)
+plt.xlabel('Peak CCU', fontsize=12)
+plt.ylabel('Game Name', fontsize=12)
+plt.grid(axis='x', linestyle='--', alpha=0.7)
+plt.tight_layout()
 plt.show()
 
