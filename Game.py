@@ -81,7 +81,8 @@ games_df_cleaned.shape
 
 games_df_cleaned.to_csv("games_df_cleaned.csv")
 # %% [markdown] 
-## Which games and game categories (e.g., single-player, multiplayer) consistently reach the highest peak concurrent users, and does this trend differ significantly across genres and game prices?
+## SMART QUESTION 3
+## Which games and game categories consistently reach the highest peak concurrent users, and does this trend differ significantly across genres?
 
 # Rearranging some columns
 # Moving data from 'Publishers' to 'Developers'
@@ -146,7 +147,7 @@ plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
 plt.show()
 
-
+# %%[markdown]
 #### Top Genres by Average Peak CCU
 
 top_genres = genre_peak_ccu_stats.nlargest(10, 'mean')
@@ -162,6 +163,7 @@ plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
 plt.show()
 
+# %% [markdown]
 #### Distribution of peak ccu across all games
 
 games_df_cleaned['Log_Peak_CCU'] = np.log1p(games_df_cleaned['Peak CCU'])
@@ -174,8 +176,8 @@ plt.ylabel("Frequency", fontsize=12)
 plt.grid(color='gray', linestyle='--', linewidth=0.5)
 plt.show()
 
+# %% [markdown]
 #### Top 10 games by Peak CCU
-
 
 top_10_games = games_df_cleaned.groupby('Name').agg({'Peak CCU': 'max'}).nlargest(10, 'Peak CCU').reset_index()
 top_10_games = top_10_games.merge(games_df_cleaned[['Name', 'Release date']], on='Name', how='left').drop_duplicates()
@@ -187,6 +189,80 @@ plt.title('Top 10 Games by Peak CCU', fontsize=16)
 plt.xlabel('Peak CCU', fontsize=12)
 plt.ylabel('Game Name', fontsize=12)
 plt.grid(axis='x', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+#### Analyzing Peak CCU over time 
+# Converting 'Release date' to datetime
+games_df_cleaned['Release date'] = pd.to_datetime(games_df_cleaned['Release date'], errors='coerce')
+
+# Extracting the release year
+games_df_cleaned['Release Year'] = games_df_cleaned['Release date'].dt.year
+
+# %% [markdown]
+#### Average Peak CCU per year
+yearly_peak_ccu = games_df_cleaned.groupby('Release Year')['Peak CCU'].mean().reset_index()
+
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=yearly_peak_ccu, x='Release Year', y='Peak CCU', marker='o', color='darkcyan')
+plt.title('Average Peak CCU by Release Year', fontsize=16)
+plt.xlabel('Release Year', fontsize=12)
+plt.ylabel('Average Peak CCU', fontsize=12)
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+#### Top Publishers and Developers by Peak CCU
+
+publisher_peak_ccu = games_df_cleaned.groupby('Publishers')['Peak CCU'].sum().reset_index()
+top_publishers = publisher_peak_ccu.nlargest(10, 'Peak CCU')
+
+plt.figure(figsize=(12, 6))
+sns.barplot(data=top_publishers, x='Peak CCU', y='Publishers', palette='coolwarm')
+plt.title('Top 10 Publishers & Developers by Total Peak CCU', fontsize=16)
+plt.xlabel('Total Peak CCU', fontsize=12)
+plt.ylabel('Publishers & Developers', fontsize=12)
+plt.grid(axis='x', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+
+#### Multivariate Analysis - Peak CCU vs Price by Categories 
+
+top_categories = games_df_cleaned.groupby('Categories')['Peak CCU'].mean().nlargest(10).index
+filtered_df = games_df_cleaned[games_df_cleaned['Categories'].isin(top_categories)]
+
+plt.figure(figsize=(12, 6))
+sns.boxplot(data=filtered_df, x='Categories', y='Peak CCU', palette='viridis')
+plt.yscale('log')  # Log scale for better visibility
+plt.title('Peak CCU Distribution by Top Categories', fontsize=16)
+plt.xlabel('Categories', fontsize=12)
+plt.ylabel('Peak CCU (Log Scale)', fontsize=12)
+plt.xticks(rotation=45, ha='right')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+
+# %% [markdown]
+#### Top Publishers and Peak CCU Across Price Ranges
+price_bins = [-0.01, 0, 5, 15, 30, 60, games_df_cleaned['Price'].max()]
+price_labels = ['Free', 'Under $5', '$5-$15', '$15-$30', '$30-$60', 'Over $60']
+games_df_cleaned['Price Range'] = pd.cut(games_df_cleaned['Price'], bins=price_bins, labels=price_labels)
+
+
+publisher_stats = games_df_cleaned.groupby(['Publishers', 'Price Range'])['Peak CCU'].mean().reset_index()
+
+
+plt.figure(figsize=(14, 8))
+sns.barplot(data=publisher_stats, x='Price Range', y='Peak CCU', hue='Publishers', palette='coolwarm')
+plt.yscale('log')
+plt.title('Peak CCU by Price Range and Publishers', fontsize=16)
+plt.xlabel('Price Range', fontsize=12)
+plt.ylabel('Average Peak CCU (Log Scale)', fontsize=12)
+plt.legend(title='Publishers', bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
 plt.show()
 
