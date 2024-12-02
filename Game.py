@@ -247,22 +247,51 @@ plt.show()
 
 
 # %% [markdown]
-#### Top Publishers and Peak CCU Across Price Ranges
-price_bins = [-0.01, 0, 5, 15, 30, 60, games_df_cleaned['Price'].max()]
-price_labels = ['Free', 'Under $5', '$5-$15', '$15-$30', '$30-$60', 'Over $60']
-games_df_cleaned['Price Range'] = pd.cut(games_df_cleaned['Price'], bins=price_bins, labels=price_labels)
+
+#### Analyzing Peak CCU by Genre and Price
+##### To check if the trends in peak concurrent users differ across genres and prices.
+
+#%%
+# Calculate average Peak CCU and Price per genre
+genre_stats = games_df_cleaned.groupby('Genres').agg({
+    'Price': 'mean',
+    'Peak CCU': 'mean'
+}).sort_values(by='Peak CCU', ascending=False)
+
+genre_stats = genre_stats.reset_index()
 
 
-publisher_stats = games_df_cleaned.groupby(['Publishers', 'Price Range'])['Peak CCU'].mean().reset_index()
+# %%
 
+import plotly.express as px
+fig = px.scatter(
+    genre_stats,
+    x='Price',
+    y='Peak CCU',
+    size='Peak CCU',
+    color='Genres',
+    hover_name='Genres',
+    title='Interactive Price vs Peak CCU by Genres',
+    labels={'Price': 'Average Price ($)', 'Peak CCU': 'Average Peak CCU'},
+    size_max=50
+)
 
-plt.figure(figsize=(14, 8))
-sns.barplot(data=publisher_stats, x='Price Range', y='Peak CCU', hue='Publishers', palette='coolwarm')
-plt.yscale('log')
-plt.title('Peak CCU by Price Range and Publishers', fontsize=16)
-plt.xlabel('Price Range', fontsize=12)
-plt.ylabel('Average Peak CCU (Log Scale)', fontsize=12)
-plt.legend(title='Publishers', bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.tight_layout()
-plt.show()
+fig.show()
+
+#%% [markdown]
+# #### High Peak CCU and Low Price:
+#
+#### Genres like Massively Multiplayer stand out with the highest average Peak CCU (3000) and a relatively low average price ($2-$3). This highlights the mass appeal of multiplayer games and their potential for attracting large player bases at lower price points.
+#
+# #### Moderate Price and Peak CCU:
+#
+#### Genres like RPG, Simulation, and Strategy have moderate Peak CCU (500–1000) and are priced slightly higher (~$4–$6). These genres balance popularity and monetization effectively.
+#
+# #### Low Peak CCU and Low Price:
+#
+#### Genres such as Photo Editing and Utilities have lower Peak CCU despite being low-priced (~$1–$2). These may appeal to niche audiences or require better marketing strategies.
+#
+# #### Premium Genres with Low CCU:
+#
+#### Genres like Video Production show higher average prices (~$7–$8) but relatively low Peak CCU. This suggests they cater to a specific, possibly professional, audience rather than mass-market appeal.
 
