@@ -513,7 +513,7 @@ plt.show()
 # ### 8.1 : K-Means Clustering: Grouping Genres Based on Similarity 
 
 #%% [markdown]
-# the genres have been grouped into 4 clusters based on their average price and average Peak CCU (popularity):
+# The genres have been grouped into 4 clusters based on their average price and average Peak CCU (popularity):
 #
 # ## Cluster 0 (Budget-Friendly, Low Popularity):
 #
@@ -708,7 +708,7 @@ print(f"Accuracy Score: {accuracy:.2f}%")
 #
 # The model achieves perfect precision, recall, and F1-scores (1.00) for all classes (Low, Medium, High).
 # 
-# the classes are balanced, and no single class dominates the dataset significantly.
+# The classes are balanced, and no single class dominates the dataset significantly.
 #
 # This indicates that the model is highly accurate in predicting all three price categories without any bias towards one class.
 #
