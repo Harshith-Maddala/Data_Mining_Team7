@@ -44,14 +44,16 @@ Our analysis is powered by the **Steam Game Dataset** available on [Kaggle](http
 ### Analytical Techniques:  
 - **EDA**: Discover trends and relationships in the data.  
 - **Linear and Logistic Regression**: Predict player behavior and game success factors.
+- **XGBoost and LightGBM**: Predict peak CCU based on Categories, Genres, Price, Developers and Publishers.
 - **K-Nearest Neighbors (KNN) Classification Model** for price categorization and prediction
 - **K-Means Clustering:** Grouping Genres Based on Similarity 
-- **Time Series Analysis**: Analyze trends in ownership and engagement over time.  
+- **Time Series Analysis**: Analyze trends in ownership and engagement over time.
+- **Statistical Tests used:** T test, Anova and post hoc tests, Chi-squared.
 
 ### Libraries and Frameworks:  
-- **Python**: Pandas, NumPy, Matplotlib, Seaborn  
+- **Python**: Pandas, NumPy, Matplotlib, Seaborn, Scipy
 - **Machine Learning**: scikit-learn  
-- **Visualization**: Plotly, Dash  
+- **Visualization**: Plotly
 
 ---
 
