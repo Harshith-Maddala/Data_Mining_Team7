@@ -668,6 +668,7 @@ genres_encoded = pd.get_dummies(games_df_cleaned['Genres'], prefix='Genre')
 
 
 X = pd.concat([genres_encoded, games_df_cleaned[['Peak CCU', 'Price']]], axis=1)
+y = games_df_cleaned['Price Category']
 
 
 # Train-test split
