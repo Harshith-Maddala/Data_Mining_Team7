@@ -176,4 +176,91 @@ plt.yticks(fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)  
 sns.despine() 
 plt.show()
+ 
+# %% [markdown]
 
+### SMART Question 2: How has the release year impacted the estimated number of owners for games on Steam, and are games released within the last five years have more estimated number of owners on average?
+
+from datetime import datetime
+
+# Convert 'Release date' and extract the year
+games_df_cleaned['Release_Date'] = pd.to_datetime(games_df_cleaned['Release date'], errors='coerce')
+games_df_cleaned['Release Year'] = games_df_cleaned['Release_Date'].dt.year
+
+# Calculate average from 'Estimated owners'
+games_df_cleaned['Estimated Owners'] = games_df_cleaned['Estimated owners'].apply(lambda x: np.mean([int(i.replace(',', '')) for i in x.split(' - ')]) if isinstance(x, str) else np.nan)
+yearly_ownership = games_df_cleaned.groupby('Release Year')['Estimated Owners'].agg(['mean', 'count']).reset_index()
+
+# Remove year 2025 from analysis
+yearly_ownership = yearly_ownership[yearly_ownership['Release Year'] < 2025]
+
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+plt.bar(yearly_ownership['Release Year'], yearly_ownership['mean'])
+plt.title('Average Estimated Owners by Release Year')
+plt.xlabel('Release Year')
+plt.ylabel('Average Estimated Owners')
+
+plt.subplot(1, 2, 2)
+plt.plot(yearly_ownership['Release Year'], yearly_ownership['count'], marker='o')
+plt.title('Number of Games Released by Year')
+plt.xlabel('Release Year')
+plt.ylabel('Number of Games')
+
+plt.tight_layout()
+plt.show()
+
+# %%
+import matplotlib.ticker as ticker  
+
+# Filter data for the last 5 years
+current_year = datetime.now().year
+last_5_years = yearly_ownership[yearly_ownership['Release Year'] >= (current_year - 4)]
+
+# Filter data for the years 1997-2001
+early_years = yearly_ownership[(yearly_ownership['Release Year'] >= 1997) & (yearly_ownership['Release Year'] <= 2001)]
+
+# Print values for both sets
+print("\nAnalysis of Games Released in Last 5 Years:")
+print(last_5_years)
+
+print("\nAnalysis of Games Released in 1997-2001:")
+print(early_years)
+
+plt.figure(figsize=(12, 6))
+
+# Plot for the last 5 years
+plt.bar(last_5_years['Release Year'], last_5_years['mean'], color='blue')
+plt.title('Average Estimated Owners (Last 5 Years)')
+plt.xlabel('Release Year')
+plt.ylabel('Average Estimated Owners')
+plt.xticks(last_5_years['Release Year'], rotation=45)
+
+plt.tight_layout()
+plt.show()
+
+# Plot for the years 1997-2001
+plt.figure(figsize=(8, 6))
+plt.bar(early_years['Release Year'], early_years['mean'], color='green')
+plt.title('Average Estimated Owners (1997-2001)')
+plt.xlabel('Release Year')
+plt.ylabel('Average Estimated Owners')
+plt.xticks(early_years['Release Year'], rotation=45)
+
+# Format y-axis to display actual values (Adjusting the scale)
+plt.gca().yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+
+plt.tight_layout()
+plt.show()
+
+# %% One-way Anova Test
+from scipy.stats import f_oneway
+
+anova_data = games_df_cleaned[['Release Year', 'Estimated Owners']].dropna()
+owners_by_year = [group['Estimated Owners'].values for year, group in anova_data.groupby('Release Year')]
+
+f_stat, p_value = f_oneway(*owners_by_year)
+
+print("One-Way ANOVA Test Results:")
+print(f"F-statistic: {f_stat:.2f}")
+print(f"P-value: {p_value:.12f}")
