@@ -151,17 +151,13 @@ for g in genres:
     for word in g.split(",") :
         all_g.append(word)
 
-
+# Create a DataFrame for Genre counts
 genres_not_unique = pd.DataFrame(all_g , columns=["genres"])
 genres_unique_counts = genres_not_unique.groupby(['genres'])['genres'].count()
 genres_unique_counts = genres_unique_counts.sort_values(ascending=False)
 
-
+# Display the top 10 Genres
 print(genres_unique_counts.head(10))
-
-
-top_10_genres = list(genres_unique_counts[:10].index)
-top_10_genres
 
 
 genres_data = genres_unique_counts[:10].sort_values(ascending=False)
@@ -194,14 +190,9 @@ categories_unique_counts = categories_not_unique.groupby(['categories'])['catego
 categories_unique_counts = categories_unique_counts.sort_values(ascending=False)
 
 # Display the top 10 categories
-categories_unique_counts.head(10)
+print(categories_unique_counts.head(10))
 
 
-# Extract the top 10 categories
-top_10_categories = list(categories_unique_counts[:10].index)
-print("Top 10 Categories:", top_10_categories)
-
-# Visualize the top 10 categories using Plotly
 categories_data = categories_unique_counts[:10].sort_values(ascending=False)
 
 
