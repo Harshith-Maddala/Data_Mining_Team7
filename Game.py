@@ -726,6 +726,10 @@ print(f"Accuracy Score: {accuracy:.2f}%")
 #
 # #### This model demonstrates that pricing and CCU, combined with genre data, are strong predictors of game success and cluster categorization.
 
+
+# %% [markdown]
+# ### Confusion Matrix Visualization for KNN Price Category Prediction
+
 #%%
 
 import seaborn as sns
@@ -744,7 +748,6 @@ plt.ylabel('Actual')
 plt.show()
 
 
-
 #%%[markdown]
 
 #### Diagonal Values (87178, 86885, 86620):
@@ -760,6 +763,7 @@ plt.show()
 # Off-Diagonal Values (2, 4, 16, 10, 3):
 #
 # These are Misclassifications (False Positives or False Negatives).
+
 
 #%%[markdown] 
 #### Conclusion for this research
