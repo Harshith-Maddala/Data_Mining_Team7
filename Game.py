@@ -520,7 +520,7 @@ plt.show()
 # #### Understanding of genre-based pricing trends through clustering and classification model.
 
 #%% [markdown]
-# ### 8.1 : Clustering: Grouping Genres Based on Similarity ( K-Means Clustering )
+# ### 8.1 : K-Means Clustering: Grouping Genres Based on Similarity 
 
 #%% [markdown]
 # the genres have been grouped into 4 clusters based on their average price and average Peak CCU (popularity):
