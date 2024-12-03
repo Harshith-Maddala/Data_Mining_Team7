@@ -266,7 +266,7 @@ print(avg_price_per_category)
 
 
 # %% [markdown]
-# ### Step 5: Visualizing the top genres and categories with highest average price
+# ### Step 5: Visualizing  genres and categories with highest and lowest average price
 
 # %%
 
@@ -515,6 +515,203 @@ plt.show()
 
 
 # %% [markdown]
-# ### Step 8: Advanced Insights and Modeling for Average Price Analysis by Genre.
+# ### Step 8: Advanced Insights and Modeling for Average Price Analysis by Genre and peak CCU.
 #
 # #### Understanding of genre-based pricing trends through clustering and classification model.
+
+#%% [markdown]
+# ### 8.1 : Clustering: Grouping Genres Based on Similarity ( K-Means Clustering )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%% [markdown]
+# ### 8.2 : Classification model - (K Nearest neighbors)
+
+#%%
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Encode genres using one-hot encoding
+genres_encoded = pd.get_dummies(games_df_cleaned['Genres'], prefix='Genre')
+
+
+X = pd.concat([genres_encoded, games_df_cleaned[['Peak CCU', 'Price']]], axis=1)
+
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+
+# Standardize numeric features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+#%%
+
+# Create and train the KNN model
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train_scaled, y_train)
+
+# Predict the price category for the test set
+y_pred = knn.predict(X_test_scaled)
+
+# Evaluate the model
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+# Ensure y_test and y_pred are of type 'category'
+y_test = y_test.astype('category')
+y_pred = pd.Series(y_pred).astype('category')
+
+#%%
+from sklearn.metrics import accuracy_score
+
+# Calculate the accuracy score
+accuracy = accuracy_score(y_test, y_pred) * 100
+print(f"Accuracy Score: {accuracy:.2f}%")
+
+
+
+# %% [markdown]
+
+# #### The KNN model's classification performance is outstanding, with near-perfect precision, recall, and F1-scores across all price categories (Low, Medium, High).
+# Conclusion about the KNN Model:
+# 
+# Classification Report:
+#
+# The model achieves perfect precision, recall, and F1-scores (1.00) for all classes (Low, Medium, High).
+# 
+# the classes are balanced, and no single class dominates the dataset significantly.
+#
+# This indicates that the model is highly accurate in predicting all three price categories without any bias towards one class.
+#
+# The overall accuracy score is 99.9%, indicating perfect performance on the test data.
+#
+# Despite having high accuracy, the model is unlikely to over fit due to balanced classes and fewer misclassifications across different price groups
+#
+# Also, as KNN is a straightforward, non-parametric model that generally doesn't overfit unless the dataset is extremely small or noisy. This huge dataset should not be a concern.
+#
+# Hence, the low number of misclassifications suggests that the data may inherently have clear distinctions between classes, making KNN highly effective for this scenario.
+#
+# Model Evaluation:
+#
+# The KNN model has successfully utilized features like Genres, Price, and Peak CCU to classify price categories effectively.
+#
+# #### This model demonstrates that pricing and CCU, combined with genre data, are strong predictors of game success and cluster categorization.
+
+#%%
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+
+# Create confusion matrix
+cm = confusion_matrix(y_test, y_pred, labels=['Low', 'Medium', 'High'])
+
+# Plot confusion matrix as a heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Low', 'Medium', 'High'], yticklabels=['Low', 'Medium', 'High'])
+plt.title('Confusion Matrix for KNN Model')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+
+
+
+#%%[markdown]
+
+#### Diagonal Values (87178, 86885, 86620):
+#
+#### These are the True Positives (TP).
+# The model correctly predicted:
+#
+# 87,178 instances as "Low" when the actual class was "Low."
+#
+# 86,885 instances as "Medium" when the actual class was "Medium."
+# 86,620 instances as "High" when the actual class was "High."
+#
+# Off-Diagonal Values (2, 4, 16, 10, 3):
+#
+# These are Misclassifications (False Positives or False Negatives).
+
+#%%[markdown] 
+#### Conclusion for this research
+#
+#### 1. Pricing Trends in Genres and Categories:
+# #### Genres with Higher Prices:
+#### Genres like Simulation, Audio Production, and RPG command the highest average prices, indicating their specialized or immersive nature that justifies premium pricing.
+#
+#### These genres often cater to niche markets or involve significant development resources.
+#
+# #### Genres with Lower Prices:
+#### Genres like Free to Play, Casual, and Documentary have the lowest average prices, highlighting their appeal to a broad audience and reliance on alternative revenue models (e.g., in-game purchases or ads).
+#
+# #### Categories with Higher Prices:
+#### Categories like SteamVR Collectibles and Remote Play on TV reflect premium-priced features that are hardware or tech-intensive, showcasing the value placed on cutting-edge gaming experiences.
+#
+# #### Categories with Lower Prices:
+#### Categories like In-App Purchases, Mods, and Cross-Platform Multiplayer often emphasize accessibility and inclusivity, leveraging lower price points to attract mass-market players.
+#### Popularity vs. Pricing:
+#
+#### Genres like Massively Multiplayer and Action see high popularity (e.g., Peak CCU) despite moderate prices, indicating that these genres thrive on large-scale participation.
+#
+#### Free to Play games demonstrate a clear trend: lower upfront prices boost user engagement, leveraging volume for profitability.
+#### Category-Genre Interplay:
+#
+#### The heatmap analysis showed clear variations in average pricing across different genre-category combinations.
+#### Premium-priced genres like Audio Production and categories like SteamVR Collectibles align with tech-heavy or professional tools.
+
+
+#%% [markdown]
+# ### Recommendations
+#
+# #### For Developers:
+#
+# Premium Experiences: If you're making a niche or advanced game (e.g., VR or Simulation), you can set higher prices because players expect to pay more for unique or high-quality experiences.
+#
+# Mass-Market Games: For popular genres like Free to Play or Casual games, keep prices low or free and focus on earning money through in-game purchases or ads.
+#
+# For Players:
+#
+# Affordable Options: If you want budget-friendly games, look at categories like Free to Play or Casual games, which are designed for everyone and often cost less.
+#
+# High-End Games: If you're looking for immersive or advanced experiences, check out premium genres like Simulation or categories like VR-supported games.
+#
+#### This research analyzed the interplay of pricing, popularity, and game features across Steam’s game library, providing actionable insights for developers and players.
+
+# %%
