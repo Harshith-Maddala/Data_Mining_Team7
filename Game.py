@@ -522,39 +522,140 @@ plt.show()
 #%% [markdown]
 # ### 8.1 : Clustering: Grouping Genres Based on Similarity ( K-Means Clustering )
 
+#%% [markdown]
+# the genres have been grouped into 4 clusters based on their average price and average Peak CCU (popularity):
+#
+# ## Cluster 0 (Budget-Friendly, Low Popularity):
+#
+# Average Price: $1.25
+# Average Peak CCU: 125.46
+#
+# Genres:
+# "360 Video," "Documentary," "Free to Play," "Movie," "Short," "Tutorial," etc.
+#
+# Insights: This cluster represents genres with low price points and low concurrent users. These are likely to be casual, accessible, or niche genres that prioritize affordability and reach.
+#
+#
+# ## Cluster 1 (Affordable, Moderate Popularity):
+# Average Price: $6.10
+# Average Peak CCU: 291.49
+# 
+# Genres:
+# "Casual," "Indie," "Utilities," "Game Development," "Massively Multiplayer," etc.
+# 
+# Insights: This cluster contains mid-range genres that balance affordability with moderate popularity. These genres might cater to a broad audience but don't achieve peak popularity.
+# 
+# ## Cluster 2 (Premium, High Popularity):
+#
+# Average Price: $8.80
+# Average Peak CCU: 420.04
+# 
+# Genres:
+# "Action," "Adventure," "Simulation," "RPG," "Strategy," etc.
+# 
+# Insights: This cluster is characterized by higher prices and significant popularity. It includes well-established genres known for immersive or competitive gaming experiences, appealing to dedicated players.
+# 
+# ## Cluster 3 (High Popularity Outliers):
+#
+# Average Price: $5.83
+# Average Peak CCU: 6702.75
+# Genres:
+# "Photo Editing"
+#
+# Insights: This cluster is an outlier due to its exceptionally high Peak CCU, suggesting games in this genre are extremely popular despite their moderate pricing. 
 
+# %%
 
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
+# Extract relevant features: Aggregate by genre and calculate mean of Price and Peak CCU
+cluster_data = games_df_cleaned.groupby('Genres')[['Price', 'Peak CCU']].mean().reset_index()
 
+# Drop genres with NaN values in clustering features
+cluster_data.dropna(inplace=True)
 
+# Normalize the features for better clustering performance
+scaler = StandardScaler()
+cluster_data_scaled = scaler.fit_transform(cluster_data[['Price', 'Peak CCU']])
 
+# Determine the optimal number of clusters using the Elbow Method
+inertia = []
+k_range = range(1, 11)  # Trying k from 1 to 10
+for k in k_range:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(cluster_data_scaled)
+    inertia.append(kmeans.inertia_)
 
+# Plot the Elbow Curve
+plt.figure(figsize=(8, 5))
+plt.plot(k_range, inertia, marker='o')
+plt.title("Elbow Method for Optimal k")
+plt.xlabel("Number of Clusters (k)")
+plt.ylabel("Inertia")
+plt.show()
 
+# Proceeding with k=4 (based on the elbow curve assumption)
+optimal_k = 4
+kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+cluster_data['Cluster'] = kmeans.fit_predict(cluster_data_scaled)
 
+# Visualize the clusters
+plt.figure(figsize=(10, 7))
+for cluster in range(optimal_k):
+    cluster_points = cluster_data[cluster_data['Cluster'] == cluster]
+    plt.scatter(cluster_points['Price'], cluster_points['Peak CCU'], label=f'Cluster {cluster}')
 
+plt.title("K-Means Clustering of Genres")
+plt.xlabel("Average Price ($)")
+plt.ylabel("Average Peak CCU")
+plt.legend()
+plt.grid(True)
+plt.show()
 
+# Display the cluster centroids and genres within each cluster
+cluster_summary = cluster_data.groupby('Cluster')[['Price', 'Peak CCU']].mean()
+print(cluster_summary)
+print(cluster_data[['Genres', 'Cluster']])
 
+#%%[markdown]
 
+# #### Price and Popularity Insights:
+#
+#### Pricing Trends:
+#
+# Genres with niche appeal or low production costs (e.g., documentaries, free-to-play games) tend to be in the lower price clusters.
+#
+# Popular and immersive genres (e.g., RPG, Action, Strategy) justify higher prices due to higher development costs and a loyal audience.
+#
+#### Popularity (Peak CCU):
+#
+# Cluster 3 highlights that some tgenres, like "Photo Editing," can achieve extreme popularity despite moderate prices, indicating a unique value proposition.
+#
+# Cluster 2 confirms that mainstream genres (e.g., Adventure, Simulation) consistently attract large audiences.
+#
+# #### Business Strategy Recommendations:
+#
+#### Developers:
+# Cluster 0: Focus on volume-driven monetization strategies, such as ad revenue or microtransactions, for low-cost, niche genres.
+#
+# Cluster 1: Maintain balance between affordability and feature richness to capture moderate audiences.
+#
+# Cluster 2: Invest in premium features, storytelling, or immersive gameplay to justify higher pricing and attract core gamers.
+#
+# Cluster 3: Leverage loyalty or niche appeal for tools or software genres to retain high engagement.
+#
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#### Consumers:
+#
+# Players on a budget can explore genres in Cluster 0 for affordable options.
+#
+# Hardcore gamers seeking premium experiences should target Cluster 2 genres.
 
 #%% [markdown]
 # ### 8.2 : Classification model - (K Nearest neighbors)
+#
+#### Comprehensive Analysis of K-Nearest Neighbors (KNN) Classification Model for price categorization and prediction
 
 #%%
 from sklearn.model_selection import train_test_split
