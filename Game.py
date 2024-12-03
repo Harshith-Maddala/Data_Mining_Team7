@@ -236,7 +236,7 @@ filtered_df = games_df_cleaned[games_df_cleaned['Categories'].isin(top_categorie
 
 plt.figure(figsize=(12, 6))
 sns.boxplot(data=filtered_df, x='Categories', y='Peak CCU', palette='viridis')
-plt.yscale('log')  # Log scale for better visibility
+plt.yscale('log') 
 plt.title('Peak CCU Distribution by Top Categories', fontsize=16)
 plt.xlabel('Categories', fontsize=12)
 plt.ylabel('Peak CCU (Log Scale)', fontsize=12)
@@ -252,7 +252,7 @@ plt.show()
 ##### To check if the trends in peak concurrent users differ across genres and prices.
 
 #%%
-# Calculate average Peak CCU and Price per genre
+
 genre_stats = games_df_cleaned.groupby('Genres').agg({
     'Price': 'mean',
     'Peak CCU': 'mean'
@@ -321,7 +321,7 @@ g = sns.catplot(
     palette='viridis'
 )
 
-g.set(yscale='log')  # Log scale for Peak CCU
+g.set(yscale='log')
 g.set_axis_labels('Categories', 'Peak CCU (Log Scale)', fontsize=12)
 g.fig.suptitle('Peak CCU Distribution by Categories and Genres', fontsize=16, y=1.02)
 g.set_xticklabels(rotation=45, ha='right')
@@ -355,7 +355,7 @@ print(f"T-Statistic = {t_stat:.2f}, p-value = {p_value:.4f}")
 plt.figure(figsize=(8, 6))
 sns.boxplot(data=games_df_cleaned[games_df_cleaned['Categories'].isin(['Single-player', 'Multi-player'])],
             x='Categories', y='Peak CCU', palette='coolwarm')
-plt.yscale('log')  # Log scale for better visualization
+plt.yscale('log')
 plt.title('Comparison of Peak CCU: Single-player vs Multi-player', fontsize=14)
 plt.xlabel('Categories', fontsize=12)
 plt.ylabel('Peak CCU (Log Scale)', fontsize=12)
@@ -428,10 +428,10 @@ from sklearn.pipeline import Pipeline
 import numpy as np
 
 # Categorical features
-categorical_features = ['Categories', 'Genres']
+categorical_features = ['Categories', 'Genres', 'Developers', 'Publishers']
 
 # Numerical features
-numerical_features = ['Price', 'Recommendations', 'Achievements']
+numerical_features = ['Price']
 
 preprocessor = ColumnTransformer(
     transformers=[
@@ -457,6 +457,107 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 # %% [markdown]
 
 #### 3. XGBoost Regression
+
+from xgboost import XGBRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import mean_squared_error, r2_score
+
+xgb_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('regressor', XGBRegressor(n_estimators=200, max_depth=10, learning_rate=0.05, random_state=42))
+])
+
+xgb_pipeline.fit(X_train, y_train)
+
+y_pred = xgb_pipeline.predict(X_test)
+
+# Evaluating the model
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"XGBoost Model: MSE = {mse:.2f}, R2 = {r2:.2f}")
+
+# %% [markdown]
+
+#### Hyperparameter tuning 
+
+from sklearn.model_selection import GridSearchCV
+
+# Parameter grid for XGBoost
+param_grid = {
+    'regressor__n_estimators': [100, 200, 300],
+    'regressor__max_depth': [6, 10, 15, 20],
+    'regressor__learning_rate': [0.01, 0.05, 0.1]
+}
+
+# Grid search
+grid_search = GridSearchCV(xgb_pipeline, param_grid, cv=3, scoring='r2', verbose=2)
+grid_search.fit(X_train, y_train)
+
+# Best parameters
+print(f"Best Parameters: {grid_search.best_params_}")
+
+# Evaluating the best model
+best_model = grid_search.best_estimator_
+y_pred_best = best_model.predict(X_test)
+mse_best = mean_squared_error(y_test, y_pred_best)
+r2_best = r2_score(y_test, y_pred_best)
+
+print(f"Best Tuned Model: MSE = {mse_best:.2f}, R2 = {r2_best:.2f}")
+
+
+# %% [markdown]
+
+#### LightGBM Model
+
+from lightgbm import LGBMRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import mean_squared_error, r2_score
+
+lgb_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('regressor', LGBMRegressor(n_estimators=200, max_depth=10, learning_rate=0.05, random_state=42))
+])
+
+# Train the model
+lgb_pipeline.fit(X_train, y_train)
+
+y_pred_lgb = lgb_pipeline.predict(X_test)
+
+# Evaluating the model
+mse_lgb = mean_squared_error(y_test, y_pred_lgb)
+r2_lgb = r2_score(y_test, y_pred_lgb)
+
+print(f"LightGBM Model: MSE = {mse_lgb:.2f}, R2 = {r2_lgb:.2f}")
+
+# %% [markdown]
+
+
+#### Hyperparameter Tuning
+
+from sklearn.model_selection import GridSearchCV
+
+# Parameter grid for LightGBM
+param_grid_lgb = {
+    'regressor__n_estimators': [100, 200, 300],
+    'regressor__max_depth': [6, 10, 15],
+    'regressor__learning_rate': [0.01, 0.05, 0.1],
+    'regressor__num_leaves': [31, 50, 100]
+}
+
+# Grid search
+grid_search_lgb = GridSearchCV(lgb_pipeline, param_grid_lgb, cv=3, scoring='r2', verbose=2)
+grid_search_lgb.fit(X_train, y_train)
+
+# Best parameters
+print(f"Best Parameters: {grid_search_lgb.best_params_}")
+
+best_lgb_model = grid_search_lgb.best_estimator_
+y_pred_best_lgb = best_lgb_model.predict(X_test)
+mse_best_lgb = mean_squared_error(y_test, y_pred_best_lgb)
+r2_best_lgb = r2_score(y_test, y_pred_best_lgb)
+
+print(f"Best Tuned LightGBM Model: MSE = {mse_best_lgb:.2f}, R2 = {r2_best_lgb:.2f}")
 
 
 
