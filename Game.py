@@ -553,7 +553,14 @@ plt.show()
 # "Photo Editing"
 #
 # Insights: This cluster is an outlier due to its exceptionally high Peak CCU, suggesting games in this genre are extremely popular despite their moderate pricing. 
-
+#
+# These clusters help uncover patterns like:
+#
+# Which genres are budget-friendly?
+#
+# Which genres are highly popular and justify premium pricing?
+#
+# Outlier genres with unique pricing or popularity trends.
 # %%
 
 from sklearn.cluster import KMeans
