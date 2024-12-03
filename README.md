@@ -21,7 +21,7 @@ We go beyond basic exploratory data analysis (EDA) to identify **actionable insi
 Our project tackles the following **S.M.A.R.T. (Specific, Measurable, Achievable, Relevant, and Time-bound)** questions:
 
 1. **Price Patterns**:  
-   What is the average price of games within each genre on Steam, and which genres have the highest and lowest average prices?
+   What is the average price of games within each genre and across categories on Steam, and which specific genres or categories have the highest and lowest average prices? 
 
 2. **Release Year Impact**:  
    How has the release year impacted the estimated number of owners for games, and are games released in the last five years more popular on average?
@@ -43,7 +43,9 @@ Our analysis is powered by the **Steam Game Dataset** available on [Kaggle](http
 
 ### Analytical Techniques:  
 - **EDA**: Discover trends and relationships in the data.  
-- **Linear and Logistic Regression**: Predict player behavior and game success factors.  
+- **Linear and Logistic Regression**: Predict player behavior and game success factors.
+- **K-Nearest Neighbors (KNN) Classification Model** for price categorization and prediction
+- **K-Means Clustering:** Grouping Genres Based on Similarity 
 - **Time Series Analysis**: Analyze trends in ownership and engagement over time.  
 
 ### Libraries and Frameworks:  
