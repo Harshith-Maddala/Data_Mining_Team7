@@ -109,7 +109,7 @@ games_df_cleaned.head()
 # %% [markdown] 
 ## SMART QUESTION 1
 #
-##### What pricing patterns emerge within game genres and categories on Steam, and which specific genres or categories exhibit the highest and lowest average prices? How do these trends correlate with game features and audience appeal?
+##### What pricing patterns emerge within game genres and categories on Steam, and which specific genres or categories exhibit the highest and lowest average prices? How do these trends correlate with game popularity or audience appeal?
 # %%
 games_df_cleaned['Genres']
 
