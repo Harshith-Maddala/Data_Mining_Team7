@@ -7,7 +7,7 @@
 # 
 
 #%%[markdown]
-# ## . Importing Required Libraries
+# ## 1. Importing Required Libraries
 
 import numpy as np
 import pandas as pd
