@@ -295,3 +295,169 @@ fig.show()
 #
 #### Genres like Video Production show higher average prices (~$7–$8) but relatively low Peak CCU. This suggests they cater to a specific, possibly professional, audience rather than mass-market appeal.
 
+
+# %% [markdown]
+
+#### Peak CCU distribution by Top Genres and Categories
+
+# Filter the top genres and categories
+top_categories = games_df_cleaned.groupby('Categories')['Peak CCU'].mean().nlargest(5).index
+top_genres = games_df_cleaned.groupby('Genres')['Peak CCU'].mean().nlargest(5).index
+
+filtered_df = games_df_cleaned[
+    (games_df_cleaned['Categories'].isin(top_categories)) &
+    (games_df_cleaned['Genres'].isin(top_genres))
+]
+
+# Creating a FacetGrid for Peak CCU distribution by genres and categories
+g = sns.catplot(
+    data=filtered_df,
+    x='Categories',
+    y='Peak CCU',
+    hue='Genres',
+    kind='box',
+    height=6,
+    aspect=2,
+    palette='viridis'
+)
+
+g.set(yscale='log')  # Log scale for Peak CCU
+g.set_axis_labels('Categories', 'Peak CCU (Log Scale)', fontsize=12)
+g.fig.suptitle('Peak CCU Distribution by Categories and Genres', fontsize=16, y=1.02)
+g.set_xticklabels(rotation=45, ha='right')
+g.add_legend(title='Genres')
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+
+#### STATISTICAL TESTS 
+##### Here are some statistical tests to analyze the relationship between Peak CCU, Categories, and Genres.
+
+# %% [markdown]
+
+#### 1. T-Test to compare peak CCU between 2 categories
+
+from scipy.stats import ttest_ind
+
+# Comparing Peak CCU between "Single-player" and "Multi-player"
+single_player_ccu = games_df_cleaned[games_df_cleaned['Categories'] == 'Single-player']['Peak CCU']
+multi_player_ccu = games_df_cleaned[games_df_cleaned['Categories'] == 'Multi-player']['Peak CCU']
+
+t_stat, p_value = ttest_ind(single_player_ccu, multi_player_ccu, equal_var=False)
+
+print(f"T-Test: Single-player vs Multi-player")
+print(f"T-Statistic = {t_stat:.2f}, p-value = {p_value:.4f}")
+
+# %% [markdown]
+
+#### Boxplot to compare the Peak CCU for Single-player and Multiplayer games
+plt.figure(figsize=(8, 6))
+sns.boxplot(data=games_df_cleaned[games_df_cleaned['Categories'].isin(['Single-player', 'Multi-player'])],
+            x='Categories', y='Peak CCU', palette='coolwarm')
+plt.yscale('log')  # Log scale for better visualization
+plt.title('Comparison of Peak CCU: Single-player vs Multi-player', fontsize=14)
+plt.xlabel('Categories', fontsize=12)
+plt.ylabel('Peak CCU (Log Scale)', fontsize=12)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+
+#### Investigating the specific games contributing to the outliers in both categories.
+outliers = games_df_cleaned[
+    (games_df_cleaned['Peak CCU'] > 1e5) & 
+    (games_df_cleaned['Categories'].isin(['Single-player', 'Multi-player']))
+]
+print(outliers[['Name', 'Categories', 'Peak CCU']])
+
+# %% [markdown]
+
+#### 2. ANOVA test for categories
+
+from scipy.stats import f_oneway
+anova_categories = f_oneway(
+    *[group['Peak CCU'].values for _, group in games_df_cleaned.groupby('Categories')]
+)
+
+print(f"ANOVA for Categories: F-Statistic = {anova_categories.statistic:.2f}, p-value = {anova_categories.pvalue:.4f}")
+
+
+# %% [markdown]
+
+#### 3. ANOVA Test for Genres
+
+anova_genres = f_oneway(
+    *[group['Peak CCU'].values for _, group in games_df_cleaned.groupby('Genres')]
+)
+
+print(f"ANOVA for Genres: F-Statistic = {anova_genres.statistic:.2f}, p-value = {anova_genres.pvalue:.4f}")
+
+# %% [markdown]
+
+#### 4. Tukey's HSD for categories - which specific categories differ significantly? 
+
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+tukey_categories = pairwise_tukeyhsd(
+    games_df_cleaned['Peak CCU'], 
+    games_df_cleaned['Categories']
+)
+print(tukey_categories.summary())
+
+# %% [markdown]
+
+#### 5. Tukey's HSD for Genres - which specific genres differ significantly?
+
+tukey_genres = pairwise_tukeyhsd(
+    games_df_cleaned['Peak CCU'], 
+    games_df_cleaned['Genres']
+)
+print(tukey_genres.summary())
+
+# %% [markdown]
+
+#### Let's predict the Peak CCU by using features like categories, genres, price and others. I feel XGBoost or LightGBM are ideal in this case. 
+
+#### 1. Feature Engineering
+
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+import numpy as np
+
+# Categorical features
+categorical_features = ['Categories', 'Genres']
+
+# Numerical features
+numerical_features = ['Price', 'Recommendations', 'Achievements']
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features),
+        ('num', 'passthrough', numerical_features)
+    ]
+)
+
+# Target variable: log-transform for stability
+games_df_cleaned['Log_Peak_CCU'] = np.log1p(games_df_cleaned['Peak CCU'])
+y = games_df_cleaned['Log_Peak_CCU']
+
+# Define X (features)
+X = games_df_cleaned[categorical_features + numerical_features]
+
+# %% [markdown]
+
+#### 2. Test-train split
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# %% [markdown]
+
+#### 3. XGBoost Regression
+
+
+
+
