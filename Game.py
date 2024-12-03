@@ -504,11 +504,10 @@ plt.show()
 #
 # Categories like "Shared/Split Screen Co-op" and "Steam Cloud" show relatively balanced distributions across all price tiers, indicating their versatility and inclusion in games with varied pricing strategies.
 
-
 # %% [markdown]
 # ### Step 8: Advanced Insights and Modeling for Average Price Analysis by Genre and peak CCU.
 #
-# #### Understanding of genre-based pricing trends through clustering and classification model.
+# #### Understanding of genre-based pricing trends through clustering and classification techniques.
 
 #%% [markdown]
 # ### 8.1 : K-Means Clustering: Grouping Genres Based on Similarity 
