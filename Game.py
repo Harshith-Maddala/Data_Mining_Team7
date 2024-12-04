@@ -315,8 +315,10 @@ fig = px.bar(
 fig.show()
 
 
+
+
 # %% [markdown]
-# ### Step 3: Calculating Average Price Per Genre- Descriptive statistics
+# ### Step 3:  Calculating Average Price Per Genre- Descriptive statistics
 
 # %%
 # Calculate the average price for each genre
@@ -357,8 +359,6 @@ print(f"Category with the Lowest Average Price: {lowest_avg_price_category} (${l
 # Display the full list of average prices for all categories
 print("\nAverage Price per Category:")
 print(avg_price_per_category)
-
-
 
 
 # %% [markdown]
@@ -1009,3 +1009,462 @@ f_stat, p_value = f_oneway(*owners_by_year)
 print("One-Way ANOVA Test Results:")
 print(f"F-statistic: {f_stat:.2f}")
 print(f"P-value: {p_value:.12f}")
+
+# %% [markdown] 
+## SMART QUESTION 3
+## Which games and game categories consistently reach the highest peak concurrent users, and does this trend differ significantly across genres?
+
+
+# %% [markdown]
+
+### Basic statistics of Numerical Columns
+print("Basic Statistics of Numerical Columns:")
+print(games_df_cleaned.describe())
+
+
+# %% [markdown]
+
+### Let's see the distribution of Peak CCU
+### Aggregate stats for peak ccu by categories
+category_peak_ccu_stats = games_df_cleaned.groupby('Categories')['Peak CCU'].agg(['mean', 'median', 'max', 'sum', 'count']).reset_index()
+category_peak_ccu_stats = category_peak_ccu_stats.sort_values(by='mean', ascending=False)
+print(category_peak_ccu_stats.head(10))
+
+# Aggregate statistics for Peak CCU by Genres
+genre_peak_ccu_stats = games_df_cleaned.groupby('Genres')['Peak CCU'].agg(['mean', 'median', 'max', 'sum', 'count']).reset_index()
+genre_peak_ccu_stats = genre_peak_ccu_stats.sort_values(by='mean', ascending=False)
+print(genre_peak_ccu_stats.head(10))
+
+# %% [markdown]
+
+#### Top Categories by Average peak CCU
+
+top_categories = category_peak_ccu_stats.nlargest(10, 'mean')
+
+# Plotting
+plt.figure(figsize=(12, 6))
+sns.barplot(data=top_categories, x='Categories', y='mean', palette='viridis')
+plt.title('Top 10 Categories by Average Peak CCU', fontsize=16)
+plt.xlabel('Categories', fontsize=12)
+plt.ylabel('Average Peak CCU', fontsize=12)
+plt.xticks(rotation=45)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# %%[markdown]
+#### Top Genres by Average Peak CCU
+
+top_genres = genre_peak_ccu_stats.nlargest(10, 'mean')
+
+# Plotting
+plt.figure(figsize=(12, 6))
+sns.barplot(data=top_genres, x='Genres', y='mean', palette='magma')
+plt.title('Top 10 Genres by Average Peak CCU', fontsize=16)
+plt.xlabel('Genres', fontsize=12)
+plt.ylabel('Average Peak CCU', fontsize=12)
+plt.xticks(rotation=45)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+#### Distribution of peak ccu across all games
+
+games_df_cleaned['Log_Peak_CCU'] = np.log1p(games_df_cleaned['Peak CCU'])
+
+plt.figure(figsize=(10, 6))
+sns.histplot(games_df_cleaned['Log_Peak_CCU'], bins=50, kde=True, color='steelblue', alpha=0.8)
+plt.title("Log-Transformed Distribution of Peak CCU", fontsize=16)
+plt.xlabel("Log(Peak CCU)", fontsize=12)
+plt.ylabel("Frequency", fontsize=12)
+plt.grid(color='gray', linestyle='--', linewidth=0.5)
+plt.show()
+
+# %% [markdown]
+#### Top 10 games by Peak CCU
+
+top_10_games = games_df_cleaned.groupby('Name').agg({'Peak CCU': 'max'}).nlargest(10, 'Peak CCU').reset_index()
+top_10_games = top_10_games.merge(games_df_cleaned[['Name', 'Release date']], on='Name', how='left').drop_duplicates()
+
+# Plotting
+plt.figure(figsize=(12, 8))
+sns.barplot(data=top_10_games, y='Name', x='Peak CCU', palette='cubehelix')
+plt.title('Top 10 Games by Peak CCU', fontsize=16)
+plt.xlabel('Peak CCU', fontsize=12)
+plt.ylabel('Game Name', fontsize=12)
+plt.grid(axis='x', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+#### Analyzing Peak CCU over time 
+# Converting 'Release date' to datetime
+games_df_cleaned['Release date'] = pd.to_datetime(games_df_cleaned['Release date'], errors='coerce')
+
+# Extracting the release year
+games_df_cleaned['Release Year'] = games_df_cleaned['Release date'].dt.year
+
+# %% [markdown]
+#### Average Peak CCU per year
+yearly_peak_ccu = games_df_cleaned.groupby('Release Year')['Peak CCU'].mean().reset_index()
+
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=yearly_peak_ccu, x='Release Year', y='Peak CCU', marker='o', color='darkcyan')
+plt.title('Average Peak CCU by Release Year', fontsize=16)
+plt.xlabel('Release Year', fontsize=12)
+plt.ylabel('Average Peak CCU', fontsize=12)
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+#### Top Publishers and Developers by Peak CCU
+
+publisher_peak_ccu = games_df_cleaned.groupby('Publishers')['Peak CCU'].sum().reset_index()
+top_publishers = publisher_peak_ccu.nlargest(10, 'Peak CCU')
+
+plt.figure(figsize=(12, 6))
+sns.barplot(data=top_publishers, x='Peak CCU', y='Publishers', palette='coolwarm')
+plt.title('Top 10 Publishers & Developers by Total Peak CCU', fontsize=16)
+plt.xlabel('Total Peak CCU', fontsize=12)
+plt.ylabel('Publishers & Developers', fontsize=12)
+plt.grid(axis='x', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+
+#### Multivariate Analysis - Peak CCU vs Price by Categories 
+
+top_categories = games_df_cleaned.groupby('Categories')['Peak CCU'].mean().nlargest(10).index
+filtered_df = games_df_cleaned[games_df_cleaned['Categories'].isin(top_categories)]
+
+plt.figure(figsize=(12, 6))
+sns.boxplot(data=filtered_df, x='Categories', y='Peak CCU', palette='viridis')
+plt.yscale('log') 
+plt.title('Peak CCU Distribution by Top Categories', fontsize=16)
+plt.xlabel('Categories', fontsize=12)
+plt.ylabel('Peak CCU (Log Scale)', fontsize=12)
+plt.xticks(rotation=45, ha='right')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+
+# %% [markdown]
+
+#### Analyzing Peak CCU by Genre and Price
+##### To check if the trends in peak concurrent users differ across genres and prices.
+
+#%%
+
+genre_stats = games_df_cleaned.groupby('Genres').agg({
+    'Price': 'mean',
+    'Peak CCU': 'mean'
+}).sort_values(by='Peak CCU', ascending=False)
+
+genre_stats = genre_stats.reset_index()
+
+
+# %%
+
+import plotly.express as px
+fig = px.scatter(
+    genre_stats,
+    x='Price',
+    y='Peak CCU',
+    size='Peak CCU',
+    color='Genres',
+    hover_name='Genres',
+    title='Interactive Price vs Peak CCU by Genres',
+    labels={'Price': 'Average Price ($)', 'Peak CCU': 'Average Peak CCU'},
+    size_max=50
+)
+
+fig.show()
+
+#%% [markdown]
+# #### High Peak CCU and Low Price:
+#
+#### Genres like Massively Multiplayer stand out with the highest average Peak CCU (3000) and a relatively low average price ($2-$3). This highlights the mass appeal of multiplayer games and their potential for attracting large player bases at lower price points.
+#
+# #### Moderate Price and Peak CCU:
+#
+#### Genres like RPG, Simulation, and Strategy have moderate Peak CCU (500–1000) and are priced slightly higher (~$4–$6). These genres balance popularity and monetization effectively.
+#
+# #### Low Peak CCU and Low Price:
+#
+#### Genres such as Photo Editing and Utilities have lower Peak CCU despite being low-priced (~$1–$2). These may appeal to niche audiences or require better marketing strategies.
+#
+# #### Premium Genres with Low CCU:
+#
+#### Genres like Video Production show higher average prices (~$7–$8) but relatively low Peak CCU. This suggests they cater to a specific, possibly professional, audience rather than mass-market appeal.
+
+
+# %% [markdown]
+
+#### Peak CCU distribution by Top Genres and Categories
+
+# Filter the top genres and categories
+top_categories = games_df_cleaned.groupby('Categories')['Peak CCU'].mean().nlargest(5).index
+top_genres = games_df_cleaned.groupby('Genres')['Peak CCU'].mean().nlargest(5).index
+
+filtered_df = games_df_cleaned[
+    (games_df_cleaned['Categories'].isin(top_categories)) &
+    (games_df_cleaned['Genres'].isin(top_genres))
+]
+
+# Creating a FacetGrid for Peak CCU distribution by genres and categories
+g = sns.catplot(
+    data=filtered_df,
+    x='Categories',
+    y='Peak CCU',
+    hue='Genres',
+    kind='box',
+    height=6,
+    aspect=2,
+    palette='viridis'
+)
+
+g.set(yscale='log')
+g.set_axis_labels('Categories', 'Peak CCU (Log Scale)', fontsize=12)
+g.fig.suptitle('Peak CCU Distribution by Categories and Genres', fontsize=16, y=1.02)
+g.set_xticklabels(rotation=45, ha='right')
+g.add_legend(title='Genres')
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+
+#### STATISTICAL TESTS 
+##### Here are some statistical tests to analyze the relationship between Peak CCU, Categories, and Genres.
+
+# %% [markdown]
+
+#### 1. T-Test to compare peak CCU between 2 categories
+
+from scipy.stats import ttest_ind
+
+# Comparing Peak CCU between "Single-player" and "Multi-player"
+single_player_ccu = games_df_cleaned[games_df_cleaned['Categories'] == 'Single-player']['Peak CCU']
+multi_player_ccu = games_df_cleaned[games_df_cleaned['Categories'] == 'Multi-player']['Peak CCU']
+
+t_stat, p_value = ttest_ind(single_player_ccu, multi_player_ccu, equal_var=False)
+
+print(f"T-Test: Single-player vs Multi-player")
+print(f"T-Statistic = {t_stat:.2f}, p-value = {p_value:.4f}")
+
+# %% [markdown]
+
+#### Boxplot to compare the Peak CCU for Single-player and Multiplayer games
+plt.figure(figsize=(8, 6))
+sns.boxplot(data=games_df_cleaned[games_df_cleaned['Categories'].isin(['Single-player', 'Multi-player'])],
+            x='Categories', y='Peak CCU', palette='coolwarm')
+plt.yscale('log')
+plt.title('Comparison of Peak CCU: Single-player vs Multi-player', fontsize=14)
+plt.xlabel('Categories', fontsize=12)
+plt.ylabel('Peak CCU (Log Scale)', fontsize=12)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+
+#### Investigating the specific games contributing to the outliers in both categories.
+outliers = games_df_cleaned[
+    (games_df_cleaned['Peak CCU'] > 1e5) & 
+    (games_df_cleaned['Categories'].isin(['Single-player', 'Multi-player']))
+]
+print(outliers[['Name', 'Categories', 'Peak CCU']])
+
+# %% [markdown]
+
+#### 2. ANOVA test for categories
+
+from scipy.stats import f_oneway
+anova_categories = f_oneway(
+    *[group['Peak CCU'].values for _, group in games_df_cleaned.groupby('Categories')]
+)
+
+print(f"ANOVA for Categories: F-Statistic = {anova_categories.statistic:.2f}, p-value = {anova_categories.pvalue:.4f}")
+
+
+# %% [markdown]
+
+#### 3. ANOVA Test for Genres
+
+anova_genres = f_oneway(
+    *[group['Peak CCU'].values for _, group in games_df_cleaned.groupby('Genres')]
+)
+
+print(f"ANOVA for Genres: F-Statistic = {anova_genres.statistic:.2f}, p-value = {anova_genres.pvalue:.4f}")
+
+# %% [markdown]
+
+#### 4. Tukey's HSD for categories - which specific categories differ significantly? 
+
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+tukey_categories = pairwise_tukeyhsd(
+    games_df_cleaned['Peak CCU'], 
+    games_df_cleaned['Categories']
+)
+print(tukey_categories.summary())
+
+# %% [markdown]
+
+#### 5. Tukey's HSD for Genres - which specific genres differ significantly?
+
+tukey_genres = pairwise_tukeyhsd(
+    games_df_cleaned['Peak CCU'], 
+    games_df_cleaned['Genres']
+)
+print(tukey_genres.summary())
+
+# %% [markdown]
+
+#### Let's predict the Peak CCU by using features like categories, genres, price and others. I feel XGBoost or LightGBM are ideal in this case. 
+
+#### 1. Feature Engineering
+
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+import numpy as np
+
+# Categorical features
+categorical_features = ['Categories', 'Genres', 'Developers', 'Publishers']
+
+# Numerical features
+numerical_features = ['Price']
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features),
+        ('num', 'passthrough', numerical_features)
+    ]
+)
+
+# Target variable: log-transform for stability
+games_df_cleaned['Log_Peak_CCU'] = np.log1p(games_df_cleaned['Peak CCU'])
+y = games_df_cleaned['Log_Peak_CCU']
+
+# Define X (features)
+X = games_df_cleaned[categorical_features + numerical_features]
+
+# %% [markdown]
+
+#### 2. Test-train split
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# %% [markdown]
+
+#### 3. XGBoost Regression
+
+from xgboost import XGBRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import mean_squared_error, r2_score
+
+xgb_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('regressor', XGBRegressor(n_estimators=200, max_depth=10, learning_rate=0.05, random_state=42))
+])
+
+xgb_pipeline.fit(X_train, y_train)
+
+y_pred = xgb_pipeline.predict(X_test)
+
+# Evaluating the model
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"XGBoost Model: MSE = {mse:.2f}, R2 = {r2:.2f}")
+
+# %% [markdown]
+
+#### Hyperparameter tuning 
+
+from sklearn.model_selection import GridSearchCV
+
+# Parameter grid for XGBoost
+param_grid = {
+    'regressor__n_estimators': [100, 200, 300],
+    'regressor__max_depth': [6, 10, 15, 20],
+    'regressor__learning_rate': [0.01, 0.05, 0.1]
+}
+
+# Grid search
+grid_search = GridSearchCV(xgb_pipeline, param_grid, cv=3, scoring='r2', verbose=2)
+grid_search.fit(X_train, y_train)
+
+# Best parameters
+print(f"Best Parameters: {grid_search.best_params_}")
+
+# Evaluating the best model
+best_model = grid_search.best_estimator_
+y_pred_best = best_model.predict(X_test)
+mse_best = mean_squared_error(y_test, y_pred_best)
+r2_best = r2_score(y_test, y_pred_best)
+
+print(f"Best Tuned Model: MSE = {mse_best:.2f}, R2 = {r2_best:.2f}")
+
+
+# %% [markdown]
+
+#### LightGBM Model
+
+from lightgbm import LGBMRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import mean_squared_error, r2_score
+
+lgb_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('regressor', LGBMRegressor(n_estimators=200, max_depth=10, learning_rate=0.05, random_state=42))
+])
+
+# Train the model
+lgb_pipeline.fit(X_train, y_train)
+
+y_pred_lgb = lgb_pipeline.predict(X_test)
+
+# Evaluating the model
+mse_lgb = mean_squared_error(y_test, y_pred_lgb)
+r2_lgb = r2_score(y_test, y_pred_lgb)
+
+print(f"LightGBM Model: MSE = {mse_lgb:.2f}, R2 = {r2_lgb:.2f}")
+
+# %% [markdown]
+
+
+#### Hyperparameter Tuning
+
+from sklearn.model_selection import GridSearchCV
+
+# Parameter grid for LightGBM
+param_grid_lgb = {
+    'regressor__n_estimators': [100, 200, 300],
+    'regressor__max_depth': [6, 10, 15],
+    'regressor__learning_rate': [0.01, 0.05, 0.1],
+    'regressor__num_leaves': [31, 50, 100]
+}
+
+# Grid search
+grid_search_lgb = GridSearchCV(lgb_pipeline, param_grid_lgb, cv=3, scoring='r2', verbose=2)
+grid_search_lgb.fit(X_train, y_train)
+
+# Best parameters
+print(f"Best Parameters: {grid_search_lgb.best_params_}")
+
+best_lgb_model = grid_search_lgb.best_estimator_
+y_pred_best_lgb = best_lgb_model.predict(X_test)
+mse_best_lgb = mean_squared_error(y_test, y_pred_best_lgb)
+r2_best_lgb = r2_score(y_test, y_pred_best_lgb)
+
+print(f"Best Tuned LightGBM Model: MSE = {mse_best_lgb:.2f}, R2 = {r2_best_lgb:.2f}")
+
+
+
+
+
