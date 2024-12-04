@@ -83,6 +83,10 @@ games_df_cleaned.head()
 
 # %% [markdown]
 ### Distribution of Required age from 1 to 21 years
+# %% [markdown]
+# ## 7. Basic Plots to Understand Few variables in Data
+
+#### Distribution of Required age from 1 to 21 years
 
 # Filter the age above '0' years
 filtered_df = games_df_cleaned[games_df_cleaned['Required age'] > 0]
@@ -100,31 +104,8 @@ plt.grid(axis='y', linestyle='--', alpha=0.7)
 sns.despine() 
 plt.show()
 
-
 # %% [markdown]
-### Top 10 tags used in Games
-from collections import Counter
-
-# tags
-tags_list = games_df_cleaned['Tags'].dropna().str.split(',').sum()
-tag_counts = Counter(tag.strip() for tag in tags_list)
-top_tags = dict(sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)[:10])
-
-plt.figure(figsize=(12, 8))
-sns.barplot(x=list(top_tags.values()), y=list(top_tags.keys()), palette='coolwarm')
-
-# plot
-plt.title('Top 10 Most Common Tags in Games', fontsize=18)
-plt.xlabel('Frequency', fontsize=14)
-plt.ylabel('Tags', fontsize=14)
-plt.xticks(fontsize=12)
-plt.yticks(fontsize=12)
-plt.grid(axis='x', linestyle='--', alpha=0.7) 
-sns.despine()  
-plt.show()
-
-# %% [markdown]
-### Distribution of Game Prices
+#### Distribution of Game Prices
 plt.figure(figsize=(12, 7))
 sns.histplot(games_df_cleaned['Price'], bins=50, color='dodgerblue', edgecolor='black')
 
@@ -138,53 +119,50 @@ plt.grid(axis='y', linestyle='--', alpha=0.7)
 sns.despine()  
 plt.show()
 
-
 # %% [markdown]
-### Distribution of games across different type of operating Platform
 
-# Convert platform columns to numeric
-platform_cols = ['Windows', 'Mac', 'Linux']
-games_df_cleaned[platform_cols] = games_df_cleaned[platform_cols].apply(pd.to_numeric, errors='coerce')
-games_df_cleaned[platform_cols] = games_df_cleaned[platform_cols].fillna(0)
+#### Top 10 Costliest Games
 
-# Sum
-platform_counts = games_df_cleaned[platform_cols].sum()
+# Sorting
+top_10_costliest_games = games_df_cleaned.sort_values(by='Price', ascending=False).head(10)
 
-plt.figure(figsize=(10, 6))
-platform_counts.plot(kind='bar', color=['#1f77b4', '#2ca02c', '#d62728'], edgecolor='black')
+plt.figure(figsize=(12, 7))
+sns.barplot(x='Price', y='Name', data=top_10_costliest_games, palette='viridis', edgecolor='black')
 
 # plot
-plt.title('Platform Availability', fontsize=18)
-plt.xlabel('Platform', fontsize=14)
-plt.ylabel('Number of Games', fontsize=14)
+plt.title('Top 10 Costliest Games on Steam', fontsize=18)
+plt.xlabel('Price ($)', fontsize=14)
+plt.ylabel('Game Names', fontsize=14)
 plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
-plt.grid(axis='y', linestyle='--', alpha=0.7)  
+plt.grid(axis='x', linestyle='--', alpha=0.7)  
 sns.despine()  
 plt.show()
 
 
-platform_cols_2 = ['Mac', 'Linux']
-games_df_cleaned[platform_cols_2] = games_df_cleaned[platform_cols_2].apply(pd.to_numeric, errors='coerce')
-games_df_cleaned[platform_cols_2] = games_df_cleaned[platform_cols_2].fillna(0)
+# %% [markdown]
 
-# Sum the counts of games 
-platform_counts = games_df_cleaned[platform_cols_2].sum()
+#### Top 10 Most Supported Audio Languages
 
-plt.figure(figsize=(10, 6))
-platform_counts.plot(kind='bar', color=['#1f77b4', '#2ca02c'], edgecolor='black')
+# Splitting the Aduio Languages list to individual Languages
+audio_languages_list = games_df_cleaned['Full audio languages'].dropna().str.split(',').sum()
+audio_languages_cleaned = [lang.strip().strip("[]'\"") for lang in audio_languages_list]
 
-# plot
-plt.title('Platform Availability (Mac & Linux)', fontsize=18)
-plt.xlabel('Platform', fontsize=14)
-plt.ylabel('Number of Games', fontsize=14)
+# Count the occurrences 
+language_counts = pd.Series(audio_languages_cleaned).value_counts()
+
+plt.figure(figsize=(12, 7))
+sns.barplot(x=language_counts.head(10).values, y=language_counts.head(10).index, palette='coolwarm', edgecolor='black')
+
+# plot 
+plt.title('Top 10 Full Audio Languages in Games', fontsize=18)
+plt.xlabel('Number of Games', fontsize=14)
+plt.ylabel('Languages', fontsize=14)
 plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
-plt.grid(axis='y', linestyle='--', alpha=0.7)  
-sns.despine() 
+plt.grid(axis='x', linestyle='--', alpha=0.7)
+sns.despine()  
 plt.show()
- 
-
 
 #%%[markdown]
 # Interchanging columns and data prep 
@@ -924,8 +902,10 @@ plt.show()
 
 # %% [markdown]
 
-### SMART Question 2: How has the release year impacted the estimated number of owners for games on Steam, and are games released within the last five years have more estimated number of owners on average?
+### SMART Question 2: How has the release year affected the estimated number of owners for games on Steam, especially for those released within the last five years? Additionally, does the price of a game influence its number of owners differently depending on the release year?
 
+
+# %% 
 from datetime import datetime
 
 # Convert 'Release date' and extract the year
@@ -955,6 +935,7 @@ plt.ylabel('Number of Games')
 plt.tight_layout()
 plt.show()
 
+# %% [markdown]
 # %%
 import matplotlib.ticker as ticker  
 
@@ -998,17 +979,64 @@ plt.gca().yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):
 plt.tight_layout()
 plt.show()
 
-# %% One-way Anova Test
-from scipy.stats import f_oneway
+# %% 
 
-anova_data = games_df_cleaned[['Release Year', 'Estimated Owners']].dropna()
-owners_by_year = [group['Estimated Owners'].values for year, group in anova_data.groupby('Release Year')]
+# Caverage game price
+yearly_price_avg = games_df_cleaned.groupby('Release Year')['Price'].mean().reset_index()
+yearly_combined = pd.merge(yearly_ownership, yearly_price_avg, on='Release Year')
 
-f_stat, p_value = f_oneway(*owners_by_year)
+plt.figure(figsize=(14, 7))
 
-print("One-Way ANOVA Test Results:")
-print(f"F-statistic: {f_stat:.2f}")
-print(f"P-value: {p_value:.12f}")
+# Plot
+plt.subplot(2, 1, 1)
+plt.plot(yearly_combined['Release Year'], yearly_combined['mean'], color='dodgerblue', label='Avg. Owners')
+plt.title('Average Estimated Owners by Release Year')
+plt.xlabel('Release Year')
+plt.ylabel('Avg. Estimated Owners')
+plt.legend()
+
+plt.subplot(2, 1, 2)
+plt.plot(yearly_combined['Release Year'], yearly_combined['Price'], color='green', label='Avg. Price')
+plt.title('Average Game Price by Release Year')
+plt.xlabel('Release Year')
+plt.ylabel('Avg. Price ($)')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+# Correlation 
+correlation = yearly_combined[['mean', 'Price']].corr().iloc[0, 1]
+print(f"Correlation between Average Price and Average Estimated Owners: {correlation:.2f}")
+
+
+# %%
+
+from scipy.stats import pearsonr
+
+# Extract necessary columns and drop missing values
+price_owners_df = games_df_cleaned[['Price', 'Estimated Owners']].dropna()
+
+# Pearson correlation test
+correlation_coefficient, p_value = pearsonr(price_owners_df['Price'], price_owners_df['Estimated Owners'])
+
+print(f"Pearson Correlation Coefficient: {correlation_coefficient:.2f}")
+print(f"P-value: {p_value:.4f}")
+if p_value < 0.05:
+    print("There is a statistically significant association between game price and the number of owners.")
+else:
+    print("There is no statistically significant association between game price and the number of owners.")
+
+# plot
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=price_owners_df, x='Price', y='Estimated Owners', alpha=0.6)
+plt.title('Scatter Plot of Game Price vs. Estimated Owners')
+plt.xlabel('Price ($)')
+plt.ylabel('Estimated Owners')
+plt.xscale('log')  
+plt.yscale('log')
+plt.grid(True)
+plt.show()
 
 # %% [markdown] 
 ## SMART QUESTION 3
