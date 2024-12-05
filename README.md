@@ -48,7 +48,7 @@ Our analysis is powered by the **Steam Game Dataset** available on [Kaggle](http
 
 ### Libraries and Frameworks:  
 - **Python**: Pandas, NumPy, Matplotlib, Seaborn  
-- **Machine Learning**: scikit-learn  
+- **Machine Learning**: scikit-learn, XGBoost   
 - **Visualization**: Plotly, Dash  
 
 ---
