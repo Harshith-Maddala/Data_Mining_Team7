@@ -8,6 +8,7 @@
 
 #%%[markdown]
 # ## 1. Importing Required Libraries
+# ## Libraries Used : Pandas, NumPy, Matplotlib, Seaborn, Scipy, scikit-learn, xgboost, lightgbm, prophet, Plotly
 
 # %%
 import numpy as np
