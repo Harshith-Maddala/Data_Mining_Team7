@@ -1396,8 +1396,6 @@ print(f"Best Tuned LightGBM Model: MSE = {mse_best_lgb:.2f}, R2 = {r2_best_lgb:.
 
 
 
-
-
 # %% [markdown]
 ### 7.0 SMART Question 4 - How have game releases evolved over time across genres, and which genres have shown the highest growth particularly focusing on the top 10 genres from 2014 to 2024?
 
@@ -1414,7 +1412,6 @@ games_df_cleaned['Month_sin'] = np.sin(2 * np.pi * games_df_cleaned['Month'] / 1
 games_df_cleaned['Month_cos'] = np.cos(2 * np.pi * games_df_cleaned['Month'] / 12)
 games_df_cleaned['Day_sin'] = np.sin(2 * np.pi * games_df_cleaned['Day'] / 31)
 games_df_cleaned['Day_cos'] = np.cos(2 * np.pi * games_df_cleaned['Day'] / 31)
-
 
 print(games_df_cleaned.head())
 
@@ -1435,7 +1432,6 @@ for genres in games_df_cleaned['Genres']:
 len(unique_genres)
 
 
-
 # %%
 unique_genres
 # %% [markdown]
@@ -1449,7 +1445,6 @@ len(unique_genres)
 games_df_cleaned.head()
 
 
-
 # %%
 columns = ["Year_released"]
 columns.extend(list(unique_genres))
@@ -1458,12 +1453,10 @@ genres_by_year = pd.DataFrame(columns=columns)
 genres_by_year 
 
 
-
 # %%[markdown]
 # # Creating a Dictionary of Genres by Year
 genres_year_dict = games_df_cleaned.groupby(games_df_cleaned["Year_released"]).apply(dict,include_groups=False).to_dict()
 genres_year_dict
-
 
 
 # %% [markdown]
@@ -1473,8 +1466,6 @@ release_trends = exploded_df.groupby(['Year_released', 'Genres']).size().unstack
 
 print("Game Releases by Year and Genre:")
 print(release_trends)
-
-
 
 
 # %% [markdown]
@@ -1647,11 +1638,10 @@ for genre in genre_monthly_trends.columns:
 if isinstance(games_df_cleaned['Genres'].iloc[0], list):
     games_df_cleaned = games_df_cleaned.explode('Genres')
 
-# Add Year and Month columns
+
 games_df_cleaned['Year'] = games_df_cleaned['Release date'].dt.year
 games_df_cleaned['Month'] = games_df_cleaned['Release date'].dt.month
 
-# Aggregate data by year, month, and genre
 genre_monthly_trends = games_df_cleaned.groupby(['Year', 'Month', 'Genres']).size().unstack(fill_value=0)
 
 
