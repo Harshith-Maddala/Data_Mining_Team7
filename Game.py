@@ -590,7 +590,7 @@ plt.show()
 # %% [markdown]
 # ### Step 8: Advanced Insights and Modeling for Average Price Analysis by Genre and peak CCU.
 #
-# #### Understanding of genre-based pricing trends through clustering and classification techniques.
+# #### Understanding of genre-based pricing trends through clustering.
 
 #%% [markdown]
 # ### 8.1 : K-Means Clustering: Grouping Genres Based on Similarity 
@@ -731,129 +731,6 @@ print(cluster_data[['Genres', 'Cluster']])
 # Players on a budget can explore genres in Cluster 0 for affordable options.
 #
 # Hardcore gamers seeking premium experiences should target Cluster 2 genres.
-
-#%% [markdown]
-# ### 8.2 : Classification model - (K Nearest neighbors)
-#
-#### Comprehensive Analysis of K-Nearest Neighbors (KNN) Classification Model for price categorization and prediction
-
-#%%
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report, confusion_matrix
-
-# Encode genres using one-hot encoding
-genres_encoded = pd.get_dummies(games_df_cleaned['Genres'], prefix='Genre')
-
-
-X = pd.concat([genres_encoded, games_df_cleaned[['Peak CCU', 'Price']]], axis=1)
-y = games_df_cleaned['Price Category']
-
-
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-
-# Standardize numeric features
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-#%%
-
-# Create and train the KNN model
-knn = KNeighborsClassifier(n_neighbors=5)
-knn.fit(X_train_scaled, y_train)
-
-# Predict the price category for the test set
-y_pred = knn.predict(X_test_scaled)
-
-# Evaluate the model
-print("Classification Report:")
-print(classification_report(y_test, y_pred))
-
-print("Confusion Matrix:")
-print(confusion_matrix(y_test, y_pred))
-
-# Ensure y_test and y_pred are of type 'category'
-y_test = y_test.astype('category')
-y_pred = pd.Series(y_pred).astype('category')
-
-#%%
-from sklearn.metrics import accuracy_score
-
-# Calculate the accuracy score
-accuracy = accuracy_score(y_test, y_pred) * 100
-print(f"Accuracy Score: {accuracy:.2f}%")
-
-
-
-# %% [markdown]
-
-# #### The KNN model's classification performance is outstanding, with near-perfect precision, recall, and F1-scores across all price categories (Low, Medium, High).
-# Conclusion about the KNN Model:
-# 
-# Classification Report:
-#
-# The model achieves perfect precision, recall, and F1-scores (1.00) for all classes (Low, Medium, High).
-# 
-# The classes are balanced, and no single class dominates the dataset significantly.
-#
-# This indicates that the model is highly accurate in predicting all three price categories without any bias towards one class.
-#
-# The overall accuracy score is 99.9%, indicating perfect performance on the test data.
-#
-# Despite having high accuracy, the model is unlikely to over fit due to balanced classes and fewer misclassifications across different price groups
-#
-# Also, as KNN is a straightforward, non-parametric model that generally doesn't overfit unless the dataset is extremely small or noisy. This huge dataset should not be a concern.
-#
-# Hence, the low number of misclassifications suggests that the data may inherently have clear distinctions between classes, making KNN highly effective for this scenario.
-#
-# Model Evaluation:
-#
-# The KNN model has successfully utilized features like Genres, Price, and Peak CCU to classify price categories effectively.
-#
-# #### This model demonstrates that pricing and CCU, combined with genre data, are strong predictors of game success and cluster categorization.
-
-
-# %% [markdown]
-# ### Confusion Matrix Visualization for KNN Price Category Prediction
-
-#%%
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
-
-# Create confusion matrix
-cm = confusion_matrix(y_test, y_pred, labels=['Low', 'Medium', 'High'])
-
-# Plot confusion matrix as a heatmap
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Low', 'Medium', 'High'], yticklabels=['Low', 'Medium', 'High'])
-plt.title('Confusion Matrix for KNN Model')
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-plt.show()
-
-
-#%%[markdown]
-
-#### Diagonal Values (87178, 86885, 86620):
-#
-#### These are the True Positives (TP).
-# The model correctly predicted:
-#
-# 87,178 instances as "Low" when the actual class was "Low."
-#
-# 86,885 instances as "Medium" when the actual class was "Medium."
-# 86,620 instances as "High" when the actual class was "High."
-#
-# Off-Diagonal Values (2, 4, 16, 10, 3):
-#
-# These are Misclassifications (False Positives or False Negatives).
-
 
 #%%[markdown] 
 #### Conclusion for this research
