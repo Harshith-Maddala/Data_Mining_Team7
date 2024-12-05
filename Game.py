@@ -1871,7 +1871,7 @@ games_df_cleaned['Release date'] = pd.to_datetime(games_df_cleaned['Release date
 # Extract year from 'Release date' to use as a numeric value for ANOVA
 games_df_cleaned['Year'] = games_df_cleaned['Release date'].dt.year
 
-# Explode the genres to have one genre per row
+
 exploded_df = games_df_cleaned.explode('Genres')
 
 
