@@ -1740,7 +1740,7 @@ games_df_cleaned['Release date'] = pd.to_datetime(games_df_cleaned['Release date
 # Extract year from 'Release date' to use as a numeric value for ANOVA
 games_df_cleaned['Year'] = games_df_cleaned['Release date'].dt.year
 
-# Explode the genres to have one genre per row
+
 exploded_df = games_df_cleaned.explode('Genres')
 
 # Filter for the top 10 genres if needed (optional)
@@ -1750,7 +1750,6 @@ exploded_df = exploded_df[exploded_df['Genres'].isin(top_10_genres)]
 # Group data by genre and collect years of release
 genre_release_years = exploded_df.groupby('Genres')['Year'].apply(list)
 
-# Perform ANOVA test
 anova_results = f_oneway(*genre_release_years)
 
 # Output the results
