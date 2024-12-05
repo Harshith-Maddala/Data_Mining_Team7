@@ -1734,7 +1734,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import f_oneway
 
-# Ensure 'Release date' is in datetime format
+
 games_df_cleaned['Release date'] = pd.to_datetime(games_df_cleaned['Release date'], errors='coerce')
 
 # Extract year from 'Release date' to use as a numeric value for ANOVA
@@ -1743,11 +1743,11 @@ games_df_cleaned['Year'] = games_df_cleaned['Release date'].dt.year
 
 exploded_df = games_df_cleaned.explode('Genres')
 
-# Filter for the top 10 genres if needed (optional)
+
 top_10_genres = exploded_df['Genres'].value_counts().head(10).index.tolist()
 exploded_df = exploded_df[exploded_df['Genres'].isin(top_10_genres)]
 
-# Group data by genre and collect years of release
+
 genre_release_years = exploded_df.groupby('Genres')['Year'].apply(list)
 
 anova_results = f_oneway(*genre_release_years)
