@@ -2,6 +2,7 @@
 
 Steam is more than just a digital playground for gamers — it's a treasure trove of data waiting to be explored. In this project, we dive deep into the Steam ecosystem, analyzing playtime, pricing, genres, reviews, and player engagement metrics to uncover the secrets behind game popularity and success. Whether you're a player, developer, or data enthusiast, this repository is your roadmap to understanding the intricate dynamics of the gaming industry.
 
+# This project aims to cover aspects like sales analysis, product performance, customer behaviour and market trends.
 ---
 
 ## 🚀 Project Overview
@@ -60,8 +61,8 @@ Our analysis is powered by the **Steam Game Dataset** available on [Kaggle](http
 ## 📊 Key Visualizations  
 As part of our project, we provide compelling visualizations to bring the data to life:
 - Genre-wise price distributions  
-- Ownership trends by release year  
-- Playtime vs. price scatterplots  
+- Ownership trends by release year and forecasting(time series) 
+- Clustering of similar genres based on price and CCU 
 - Peak concurrent user analysis  
 
 ---
