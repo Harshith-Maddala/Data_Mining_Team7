@@ -15,7 +15,6 @@ We go beyond basic exploratory data analysis (EDA) to identify **actionable insi
 - **Game Characteristics**: How do factors like genre, release year, and multiplayer options shape success?  
 
 ---
-
 ## 🧠 SMART Questions
 
 Our project tackles the following **S.M.A.R.T. (Specific, Measurable, Achievable, Relevant, and Time-bound)** questions:
