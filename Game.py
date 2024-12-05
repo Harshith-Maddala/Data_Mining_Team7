@@ -1521,3 +1521,370 @@ print(f"Best Tuned LightGBM Model: MSE = {mse_best_lgb:.2f}, R2 = {r2_best_lgb:.
 
 
 
+# %% [markdown]
+### 7.0 SMART Question 4 - How have game releases evolved over time across genres, and which genres have shown the highest growth particularly focusing on the top 10 genres from 2014 to 2024?
+
+games_df_cleaned = games_df_cleaned.dropna(subset=['Release date'])
+games_df_cleaned['Release date'] = pd.to_datetime(games_df_cleaned['Release date'], errors='coerce')
+
+games_df_cleaned['Year_released'] = games_df_cleaned['Release date']
+games_df_cleaned['Year'] = games_df_cleaned['Year_released'].dt.year
+games_df_cleaned['Month'] = games_df_cleaned['Year_released'].dt.month
+games_df_cleaned['Day'] = games_df_cleaned['Year_released'].dt.day
+
+# Cyclical encoding for month and day
+games_df_cleaned['Month_sin'] = np.sin(2 * np.pi * games_df_cleaned['Month'] / 12)
+games_df_cleaned['Month_cos'] = np.cos(2 * np.pi * games_df_cleaned['Month'] / 12)
+games_df_cleaned['Day_sin'] = np.sin(2 * np.pi * games_df_cleaned['Day'] / 31)
+games_df_cleaned['Day_cos'] = np.cos(2 * np.pi * games_df_cleaned['Day'] / 31)
+
+
+print(games_df_cleaned.head())
+
+games_df_cleaned =  games_df_cleaned[(games_df_cleaned['Year'] >= 2014) & (games_df_cleaned['Year'] <= 2024)]
+
+games_df_cleaned.head()
+
+
+# %% [markdown]
+# # Splitting and Formatting Genres
+games_df_cleaned['Genres'] = games_df_cleaned['Genres'].str.split(',')
+games_df_cleaned['Genres'] = games_df_cleaned['Genres'].apply(lambda x: [a.lower().title() for a in x])
+
+unique_genres = set()
+for genres in games_df_cleaned['Genres']:
+    unique_genres.update(genres)
+    
+len(unique_genres)
+
+
+
+# %%
+unique_genres
+# %% [markdown]
+# # Filtering Unwanted Genres
+genres_to_remove = ["Free To Play","Early Access"]
+
+unique_genres = unique_genres.difference(genres_to_remove)
+len(unique_genres)
+
+# %% 
+games_df_cleaned.head()
+
+
+
+# %%
+columns = ["Year_released"]
+columns.extend(list(unique_genres))
+
+genres_by_year = pd.DataFrame(columns=columns)
+genres_by_year 
+
+
+
+# %%[markdown]
+# # Creating a Dictionary of Genres by Year
+genres_year_dict = games_df_cleaned.groupby(games_df_cleaned["Year_released"]).apply(dict,include_groups=False).to_dict()
+genres_year_dict
+
+
+
+# %% [markdown]
+# # Game Releases by Year and Genre
+exploded_df = games_df_cleaned.explode('Genres')
+release_trends = exploded_df.groupby(['Year_released', 'Genres']).size().unstack(fill_value=0)
+
+print("Game Releases by Year and Genre:")
+print(release_trends)
+
+
+
+
+# %% [markdown]
+# ### Identifying Top 10 Genres
+genre_counts = exploded_df['Genres'].value_counts()
+
+top_10_genres = genre_counts.head(10).index.tolist()
+print("Top 10 Genres:")
+print(top_10_genres)
+
+
+# %% [markdown]
+# ###Explode Tags column for individual genre-level analysis
+top_10_genres_df = exploded_df[exploded_df['Genres'].isin(top_10_genres)]
+release_trends_top10 = top_10_genres_df.groupby(['Year', 'Genres']).size().unstack(fill_value=0)
+
+print("Year-wise Trends for Top 10 Genres:")
+print(release_trends_top10)
+
+
+# %% [markdown]
+# ### Visualizing Game Releases by Genre Over Time
+exploded_df = top_10_genres_df.explode('Genres')
+
+# Group by Year and Genre to analyze release trends
+release_trends = exploded_df.groupby(['Year', 'Genres']).size().unstack(fill_value=0)
+
+yearly_totals = release_trends.sum(axis=1)
+
+# Plot the stacked bar chart
+ax = release_trends.plot(kind='bar', stacked=True, figsize=(12, 6), colormap='tab20')
+
+plt.title('Game Releases Over Time by Genre')
+plt.xlabel('Year Released')
+plt.ylabel('Number of Games Released')
+plt.legend(title='Genres', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
+
+# Add percentage labels on each bar
+for i, year in enumerate(release_trends.index):
+    total = yearly_totals[year]
+    for genre in release_trends.columns:
+        count = release_trends.loc[year, genre]
+        if count > 0:
+            percentage = (count / total) * 100
+            ax.text(i, count / 2 + release_trends.loc[year].cumsum()[genre] - count,
+                    f'{percentage:.1f}%', ha='center', va='center', color='white', fontsize=8)
+
+plt.show()
+
+# %% [markdown]
+# ### Proportional Trends of Top 10 Genres Over Time
+import plotly.graph_objects as go
+
+release_trends_normalized = release_trends_top10.div(release_trends_top10.sum(axis=1), axis=0)
+
+fig = go.Figure()
+for genre in release_trends_normalized.columns:
+    fig.add_trace(go.Scatter(
+        x=release_trends_normalized.index,
+        y=release_trends_normalized[genre],
+        mode='lines',
+        stackgroup='one',
+        name=genre
+    ))
+
+fig.update_layout(
+    title='Proportion of Games Released by Top 10 Genres Over Time',
+    xaxis_title='Year Released',
+    yaxis_title='Proportion of Games',
+    showlegend=True
+)
+fig.show()
+
+
+
+# %%[markdown]
+# ### Calculating Growth Rates by Genre
+
+initial_counts = release_trends_top10.iloc[0] 
+final_counts = release_trends_top10.iloc[-1]
+
+growth_rates = ((final_counts - initial_counts) / initial_counts.replace(0, np.nan)) * 100
+growth_rates = growth_rates.fillna(0).sort_values(ascending=False)
+
+print("Growth Rates by Genre:")
+print(growth_rates)
+
+# %% [markdown]
+# ### Determining Top Genre Each Year
+release_trends_top10['Top Genre'] = release_trends_top10.idxmax(axis=1)
+
+top_genre_counts = release_trends_top10['Top Genre'].value_counts()
+
+print("Top Genre Each Year:")
+print(release_trends_top10[['Top Genre']])
+print("\nTop Genre Counts:")
+print(top_genre_counts)
+
+
+
+# %%[markdown]
+# # Model Evaluation for Genre Prediction Using Random Forest
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+
+
+genre_accuracy_results = {}
+one_hot_tags = games_df_cleaned['Genres'].apply(lambda x: pd.Series(1, index=x)).fillna(0)
+features = pd.concat([games_df_cleaned[['Year', 'Month', 'Day']], one_hot_tags], axis=1)
+for genre in top_10_genres:
+    print(f"\nEvaluating model for genre: {genre}")
+    
+
+    features['Target'] = one_hot_tags[genre]
+    
+
+    X = features[['Year', 'Month', 'Day']] 
+    y = features['Target']                 
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    model = RandomForestClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    
+    y_pred = model.predict(X_test)
+    
+
+    accuracy = accuracy_score(y_test, y_pred)
+    report = classification_report(y_test, y_pred)
+    
+    print(f"Accuracy for {genre}: {accuracy * 100:.2f}%")
+    print(f"Classification Report for {genre}:\n{report}")
+    
+    genre_accuracy_results[genre] = {
+        'accuracy': accuracy,
+        'classification_report': report
+    }
+
+print("\nSummary of Accuracy Results for Top 10 Genres:")
+for genre, results in genre_accuracy_results.items():
+    print(f"{genre}: Accuracy = {results['accuracy'] * 100:.2f}%")
+
+
+
+# %% [markdown]
+# ### Forecasting Future Trends with Prophet
+from prophet import Prophet
+
+if isinstance(games_df_cleaned['Genres'].iloc[0], list):
+    games_df_cleaned = games_df_cleaned.explode('Genres')
+
+games_df_cleaned['Year'] = games_df_cleaned['Release date'].dt.year
+genre_monthly_trends = games_df_cleaned.groupby(['Year', 'Month', 'Genres']).size().unstack(fill_value=0)
+specified_genres = ["Early Access", "Free To Play", "Casual", "Simulation", 
+                    "Sports", "Adventure", "Indie", "Rpg", "Strategy", "Action"]
+genre_monthly_trends = genre_monthly_trends[specified_genres]
+future_monthly_trends = {}
+months_future = pd.date_range(start='2025-01-01', periods=12, freq='M')
+
+for genre in genre_monthly_trends.columns:
+    last_year_data = genre_monthly_trends[genre].iloc[-12:].values
+    increment = np.mean(last_year_data) * 0.05  
+    future_data = last_year_data + increment
+    future_monthly_trends[genre] = future_data[:12]  
+
+# %% [markdown]
+# # Preparing Data for Forecasting with Prophet
+if isinstance(games_df_cleaned['Genres'].iloc[0], list):
+    games_df_cleaned = games_df_cleaned.explode('Genres')
+
+# Add Year and Month columns
+games_df_cleaned['Year'] = games_df_cleaned['Release date'].dt.year
+games_df_cleaned['Month'] = games_df_cleaned['Release date'].dt.month
+
+# Aggregate data by year, month, and genre
+genre_monthly_trends = games_df_cleaned.groupby(['Year', 'Month', 'Genres']).size().unstack(fill_value=0)
+
+
+specified_genres = ["Casual", "Simulation", 
+                    "Sports", "Adventure", "Indie", "Rpg", "Strategy", "Action"]
+genre_monthly_trends = genre_monthly_trends[specified_genres]
+
+forecasts = {}
+for genre in specified_genres:
+    df_genre = genre_monthly_trends[[genre]].reset_index()
+    df_genre['ds'] = pd.to_datetime(df_genre['Year'].astype(str) + '-' + df_genre['Month'].astype(str))
+  
+
+# %% [markdown]
+# # Forecasting Monthly Game Releases Using Prophet
+filtered_data = exploded_df[exploded_df['Genres'].isin(specified_genres)]
+monthly_data = exploded_df.groupby(['Year', 'Month', 'Genres']).size().unstack(fill_value=0).reset_index()
+
+from prophet import Prophet
+
+forecasts = {}
+
+forecasts = {}
+
+for genre in specified_genres:
+
+    genre_data = monthly_data[[genre]].reset_index()
+    genre_data['ds'] = df_genre['ds']
+    genre_data = genre_data.rename(columns={'Date': 'ds', genre: 'y'}) 
+
+    print(f"Prepared data for genre: {genre}")
+    print(genre_data.head()) 
+    
+
+    model = Prophet()
+    model.fit(genre_data)
+    
+
+    future = model.make_future_dataframe(periods=24, freq='M') 
+    forecast = model.predict(future)
+    
+    forecasts[genre] = forecast[['ds', 'yhat']].set_index('ds')
+
+combined_forecasts = pd.DataFrame()
+
+for genre, forecast in forecasts.items():
+    forecast = forecast.rename(columns={'yhat': genre})
+    if combined_forecasts.empty:
+        combined_forecasts = forecast
+    else:
+        combined_forecasts = combined_forecasts.join(forecast, how='outer')
+
+
+combined_forecasts = combined_forecasts['2014-01-01':'2025-12-31']
+print(combined_forecasts.head()) 
+# %% [markdown]
+# # Visualizing Predicted Game Releases by Genre (2025-2026)
+import plotly.graph_objects as go
+
+fig = go.Figure()
+
+for genre in combined_forecasts.columns:
+    fig.add_trace(go.Scatter(
+        x=combined_forecasts.index,
+        y=combined_forecasts[genre],
+        mode='lines',
+        stackgroup='one',  # Stacked area chart
+        name=genre
+    ))
+
+fig.update_layout(
+    title='Predicted Game Releases by Genre (2014-2025)',
+    xaxis_title='Date',
+    yaxis_title='Number of Predicted Releases',
+    showlegend=True
+)
+fig.show()
+# %%
+import pandas as pd
+import numpy as np
+from scipy.stats import f_oneway
+
+# Ensure 'Release date' is in datetime format
+games_df_cleaned['Release date'] = pd.to_datetime(games_df_cleaned['Release date'], errors='coerce')
+
+# Extract year from 'Release date' to use as a numeric value for ANOVA
+games_df_cleaned['Year'] = games_df_cleaned['Release date'].dt.year
+
+# Explode the genres to have one genre per row
+exploded_df = games_df_cleaned.explode('Genres')
+
+# Filter for the top 10 genres if needed (optional)
+top_10_genres = exploded_df['Genres'].value_counts().head(10).index.tolist()
+exploded_df = exploded_df[exploded_df['Genres'].isin(top_10_genres)]
+
+# Group data by genre and collect years of release
+genre_release_years = exploded_df.groupby('Genres')['Year'].apply(list)
+
+# Perform ANOVA test
+anova_results = f_oneway(*genre_release_years)
+
+# Output the results
+print(f"ANOVA F-statistic: {anova_results.statistic}")
+print(f"ANOVA p-value: {anova_results.pvalue}")
+
+# Interpret the results
+if anova_results.pvalue < 0.05:
+    print("There is a significant difference in release years across genres.")
+else:
+    print("There is no significant difference in release years across genres.")
+
+
+# %%
