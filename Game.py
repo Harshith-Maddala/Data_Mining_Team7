@@ -981,13 +981,14 @@ plt.show()
 
 # %% 
 
-# Caverage game price
+# Calculate average game price by release year
 yearly_price_avg = games_df_cleaned.groupby('Release Year')['Price'].mean().reset_index()
 yearly_combined = pd.merge(yearly_ownership, yearly_price_avg, on='Release Year')
 
+# Plot 
 plt.figure(figsize=(14, 7))
 
-# Plot
+# Ownership trend
 plt.subplot(2, 1, 1)
 plt.plot(yearly_combined['Release Year'], yearly_combined['mean'], color='dodgerblue', label='Avg. Owners')
 plt.title('Average Estimated Owners by Release Year')
@@ -995,6 +996,7 @@ plt.xlabel('Release Year')
 plt.ylabel('Avg. Estimated Owners')
 plt.legend()
 
+# Price trend
 plt.subplot(2, 1, 2)
 plt.plot(yearly_combined['Release Year'], yearly_combined['Price'], color='green', label='Avg. Price')
 plt.title('Average Game Price by Release Year')
@@ -1005,9 +1007,34 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 
-# Correlation 
+# Correlation analysis
 correlation = yearly_combined[['mean', 'Price']].corr().iloc[0, 1]
 print(f"Correlation between Average Price and Average Estimated Owners: {correlation:.2f}")
+
+# %% 
+
+# Plot for the number of games released (2020-2024 and 1997-2001)
+plt.figure(figsize=(12, 6))
+
+plt.subplot(1, 2, 1)
+plt.bar(last_5_years['Release Year'], last_5_years['count'], color='blue', edgecolor='black')
+plt.title('Number of Games Released (2020-2024)')
+plt.xlabel('Release Year')
+plt.ylabel('Number of Games')
+plt.xticks(last_5_years['Release Year'])
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+plt.subplot(1, 2, 2)
+plt.bar(early_years['Release Year'], early_years['count'], color='green', edgecolor='black')
+plt.title('Number of Games Released (1997-2001)')
+plt.xlabel('Release Year')
+plt.ylabel('Number of Games')
+plt.xticks(early_years['Release Year'])
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.gca().yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+
+plt.tight_layout()
+plt.show()
 
 
 # %%
@@ -1017,17 +1044,15 @@ from scipy.stats import pearsonr
 # Extract necessary columns and drop missing values
 price_owners_df = games_df_cleaned[['Price', 'Estimated Owners']].dropna()
 
-# Pearson correlation test
+# Perform Pearson correlation test
 correlation_coefficient, p_value = pearsonr(price_owners_df['Price'], price_owners_df['Estimated Owners'])
 
+# Print the results
 print(f"Pearson Correlation Coefficient: {correlation_coefficient:.2f}")
-print(f"P-value: {p_value:.4f}")
-if p_value < 0.05:
-    print("There is a statistically significant association between game price and the number of owners.")
-else:
-    print("There is no statistically significant association between game price and the number of owners.")
+print(f"P-value: {p_value:.2e}")  
 
-# plot
+
+# Plot
 plt.figure(figsize=(10, 6))
 sns.scatterplot(data=price_owners_df, x='Price', y='Estimated Owners', alpha=0.6)
 plt.title('Scatter Plot of Game Price vs. Estimated Owners')
