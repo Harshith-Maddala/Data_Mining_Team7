@@ -936,6 +936,8 @@ plt.tight_layout()
 plt.show()
 
 # %% [markdown]
+
+
 # %%
 import matplotlib.ticker as ticker  
 
