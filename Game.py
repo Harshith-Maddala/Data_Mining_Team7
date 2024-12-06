@@ -8,6 +8,7 @@
 
 #%%[markdown]
 # ## 1. Importing Required Libraries
+# ## Libraries Used : Pandas, NumPy, Matplotlib, Seaborn, Scipy, scikit-learn, xgboost, lightgbm, prophet, Plotly
 
 # %%
 import numpy as np
@@ -590,7 +591,7 @@ plt.show()
 # %% [markdown]
 # ### Step 8: Advanced Insights and Modeling for Average Price Analysis by Genre and peak CCU.
 #
-# #### Understanding of genre-based pricing trends through clustering and classification techniques.
+# #### Understanding of genre-based pricing trends through clustering.
 
 #%% [markdown]
 # ### 8.1 : K-Means Clustering: Grouping Genres Based on Similarity 
@@ -731,129 +732,6 @@ print(cluster_data[['Genres', 'Cluster']])
 # Players on a budget can explore genres in Cluster 0 for affordable options.
 #
 # Hardcore gamers seeking premium experiences should target Cluster 2 genres.
-
-#%% [markdown]
-# ### 8.2 : Classification model - (K Nearest neighbors)
-#
-#### Comprehensive Analysis of K-Nearest Neighbors (KNN) Classification Model for price categorization and prediction
-
-#%%
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report, confusion_matrix
-
-# Encode genres using one-hot encoding
-genres_encoded = pd.get_dummies(games_df_cleaned['Genres'], prefix='Genre')
-
-
-X = pd.concat([genres_encoded, games_df_cleaned[['Peak CCU', 'Price']]], axis=1)
-y = games_df_cleaned['Price Category']
-
-
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-
-# Standardize numeric features
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-#%%
-
-# Create and train the KNN model
-knn = KNeighborsClassifier(n_neighbors=5)
-knn.fit(X_train_scaled, y_train)
-
-# Predict the price category for the test set
-y_pred = knn.predict(X_test_scaled)
-
-# Evaluate the model
-print("Classification Report:")
-print(classification_report(y_test, y_pred))
-
-print("Confusion Matrix:")
-print(confusion_matrix(y_test, y_pred))
-
-# Ensure y_test and y_pred are of type 'category'
-y_test = y_test.astype('category')
-y_pred = pd.Series(y_pred).astype('category')
-
-#%%
-from sklearn.metrics import accuracy_score
-
-# Calculate the accuracy score
-accuracy = accuracy_score(y_test, y_pred) * 100
-print(f"Accuracy Score: {accuracy:.2f}%")
-
-
-
-# %% [markdown]
-
-# #### The KNN model's classification performance is outstanding, with near-perfect precision, recall, and F1-scores across all price categories (Low, Medium, High).
-# Conclusion about the KNN Model:
-# 
-# Classification Report:
-#
-# The model achieves perfect precision, recall, and F1-scores (1.00) for all classes (Low, Medium, High).
-# 
-# The classes are balanced, and no single class dominates the dataset significantly.
-#
-# This indicates that the model is highly accurate in predicting all three price categories without any bias towards one class.
-#
-# The overall accuracy score is 99.9%, indicating perfect performance on the test data.
-#
-# Despite having high accuracy, the model is unlikely to over fit due to balanced classes and fewer misclassifications across different price groups
-#
-# Also, as KNN is a straightforward, non-parametric model that generally doesn't overfit unless the dataset is extremely small or noisy. This huge dataset should not be a concern.
-#
-# Hence, the low number of misclassifications suggests that the data may inherently have clear distinctions between classes, making KNN highly effective for this scenario.
-#
-# Model Evaluation:
-#
-# The KNN model has successfully utilized features like Genres, Price, and Peak CCU to classify price categories effectively.
-#
-# #### This model demonstrates that pricing and CCU, combined with genre data, are strong predictors of game success and cluster categorization.
-
-
-# %% [markdown]
-# ### Confusion Matrix Visualization for KNN Price Category Prediction
-
-#%%
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
-
-# Create confusion matrix
-cm = confusion_matrix(y_test, y_pred, labels=['Low', 'Medium', 'High'])
-
-# Plot confusion matrix as a heatmap
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Low', 'Medium', 'High'], yticklabels=['Low', 'Medium', 'High'])
-plt.title('Confusion Matrix for KNN Model')
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-plt.show()
-
-
-#%%[markdown]
-
-#### Diagonal Values (87178, 86885, 86620):
-#
-#### These are the True Positives (TP).
-# The model correctly predicted:
-#
-# 87,178 instances as "Low" when the actual class was "Low."
-#
-# 86,885 instances as "Medium" when the actual class was "Medium."
-# 86,620 instances as "High" when the actual class was "High."
-#
-# Off-Diagonal Values (2, 4, 16, 10, 3):
-#
-# These are Misclassifications (False Positives or False Negatives).
-
 
 #%%[markdown] 
 #### Conclusion for this research
@@ -1521,8 +1399,6 @@ print(f"Best Tuned LightGBM Model: MSE = {mse_best_lgb:.2f}, R2 = {r2_best_lgb:.
 
 
 
-
-
 # %% [markdown]
 ### 7.0 SMART Question 4 - How have game releases evolved over time across genres, and which genres have shown the highest growth particularly focusing on the top 10 genres from 2014 to 2024?
 
@@ -1539,7 +1415,6 @@ games_df_cleaned['Month_sin'] = np.sin(2 * np.pi * games_df_cleaned['Month'] / 1
 games_df_cleaned['Month_cos'] = np.cos(2 * np.pi * games_df_cleaned['Month'] / 12)
 games_df_cleaned['Day_sin'] = np.sin(2 * np.pi * games_df_cleaned['Day'] / 31)
 games_df_cleaned['Day_cos'] = np.cos(2 * np.pi * games_df_cleaned['Day'] / 31)
-
 
 print(games_df_cleaned.head())
 
@@ -1560,7 +1435,6 @@ for genres in games_df_cleaned['Genres']:
 len(unique_genres)
 
 
-
 # %%
 unique_genres
 # %% [markdown]
@@ -1574,7 +1448,6 @@ len(unique_genres)
 games_df_cleaned.head()
 
 
-
 # %%
 columns = ["Year_released"]
 columns.extend(list(unique_genres))
@@ -1583,12 +1456,10 @@ genres_by_year = pd.DataFrame(columns=columns)
 genres_by_year 
 
 
-
 # %%[markdown]
 # # Creating a Dictionary of Genres by Year
 genres_year_dict = games_df_cleaned.groupby(games_df_cleaned["Year_released"]).apply(dict,include_groups=False).to_dict()
 genres_year_dict
-
 
 
 # %% [markdown]
@@ -1598,8 +1469,6 @@ release_trends = exploded_df.groupby(['Year_released', 'Genres']).size().unstack
 
 print("Game Releases by Year and Genre:")
 print(release_trends)
-
-
 
 
 # %% [markdown]
@@ -1772,11 +1641,10 @@ for genre in genre_monthly_trends.columns:
 if isinstance(games_df_cleaned['Genres'].iloc[0], list):
     games_df_cleaned = games_df_cleaned.explode('Genres')
 
-# Add Year and Month columns
+
 games_df_cleaned['Year'] = games_df_cleaned['Release date'].dt.year
 games_df_cleaned['Month'] = games_df_cleaned['Release date'].dt.month
 
-# Aggregate data by year, month, and genre
 genre_monthly_trends = games_df_cleaned.groupby(['Year', 'Month', 'Genres']).size().unstack(fill_value=0)
 
 
@@ -1859,23 +1727,22 @@ import pandas as pd
 import numpy as np
 from scipy.stats import f_oneway
 
-# Ensure 'Release date' is in datetime format
+
 games_df_cleaned['Release date'] = pd.to_datetime(games_df_cleaned['Release date'], errors='coerce')
 
 # Extract year from 'Release date' to use as a numeric value for ANOVA
 games_df_cleaned['Year'] = games_df_cleaned['Release date'].dt.year
 
-# Explode the genres to have one genre per row
+
 exploded_df = games_df_cleaned.explode('Genres')
 
-# Filter for the top 10 genres if needed (optional)
+
 top_10_genres = exploded_df['Genres'].value_counts().head(10).index.tolist()
 exploded_df = exploded_df[exploded_df['Genres'].isin(top_10_genres)]
 
-# Group data by genre and collect years of release
+
 genre_release_years = exploded_df.groupby('Genres')['Year'].apply(list)
 
-# Perform ANOVA test
 anova_results = f_oneway(*genre_release_years)
 
 # Output the results
