@@ -123,8 +123,11 @@ plt.grid(axis='y', linestyle='--', alpha=0.7)
 sns.despine()  
 plt.show()
 
+#### When we tried to plot the graph, most of the games came out between the range of $0 and $50. 
+
 # %% [markdown]
 
+#### Looking at the previous graph, we wanted to see the costliest games available in steam.
 #### Top 10 Costliest Games
 
 # Sorting
@@ -143,6 +146,8 @@ plt.grid(axis='x', linestyle='--', alpha=0.7)
 sns.despine()  
 plt.show()
 
+#### The top three games were almost $1000, while the 4th and 5th games were priced at $500 and $300. 
+#### The remaining 5 games were priced between $270 and $200.The top three games were almost $1000, while the 4th and 5th games were priced at $500 and $300. The remaining 5 games were priced between $270 and $200.
 
 # %% [markdown]
 
