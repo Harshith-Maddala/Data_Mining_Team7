@@ -86,7 +86,7 @@ games_df_cleaned.head()
 ### Distribution of Required age from 1 to 21 years
 # %% [markdown]
 # ## 7. Basic Plots to Understand Few variables in Data
-
+#### Now that the data cleaning is completed, let’s move on to the EDA part
 #### Distribution of Required age from 1 to 21 years
 
 # Filter the age above '0' years
@@ -104,6 +104,9 @@ plt.yticks(fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)  
 sns.despine() 
 plt.show()
+
+#### More than 90 percent of the games required no age limit, meaning the player can be more than 0 years old. 
+#### The top three required ages are 17+, 18+, and 13+, besides ages 0+.
 
 # %% [markdown]
 #### Distribution of Game Prices
