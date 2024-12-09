@@ -810,6 +810,7 @@ yearly_ownership = games_df_cleaned.groupby('Release Year')['Estimated Owners'].
 # Remove year 2025 from analysis
 yearly_ownership = yearly_ownership[yearly_ownership['Release Year'] < 2025]
 
+####  Exploratory Data Analysis
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
 plt.bar(yearly_ownership['Release Year'], yearly_ownership['mean'])
