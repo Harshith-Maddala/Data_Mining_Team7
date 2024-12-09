@@ -173,6 +173,7 @@ plt.grid(axis='x', linestyle='--', alpha=0.7)
 sns.despine()  
 plt.show()
 
+#### The above graph tells us the top 10 mostly used audio languages in games. Almost every game has English language audio available. 
 #%%[markdown]
 # Interchanging columns and data prep 
 
