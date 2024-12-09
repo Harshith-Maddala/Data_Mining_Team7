@@ -795,6 +795,10 @@ print(cluster_data[['Genres', 'Cluster']])
 # %% 
 from datetime import datetime
 
+#### We will be solving this SMART question in three steps: Data Preprocessing, Exploratory Data Analysis and Statistical Testing
+
+#### Data Preprocessing
+
 # Convert 'Release date' and extract the year
 games_df_cleaned['Release_Date'] = pd.to_datetime(games_df_cleaned['Release date'], errors='coerce')
 games_df_cleaned['Release Year'] = games_df_cleaned['Release_Date'].dt.year
