@@ -397,38 +397,6 @@ plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the rect parameter for the titl
 plt.show()
 
 
-
-#%%
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-# Step 1: Create a pivot table with Genres as rows and Categories as columns
-pivot_table = games_df_cleaned.pivot_table(
-    values='Price', 
-    index='Genres', 
-    columns='Categories', 
-    aggfunc='mean'
-)
-
-
-# Step 2: Fill NaN values with 0 or another placeholder to represent missing data
-pivot_table.fillna(0, inplace=True)
-
-# Step 3: Plot the heat map
-plt.figure(figsize=(15, 10))  # Adjust the size as needed
-sns.heatmap(
-    pivot_table, 
-    annot=False,  # Set to True to see the numerical values
-    cmap='coolwarm',  # Choose a color map
-    cbar_kws={'label': 'Average Price ($)'}  # Add a color bar with a label
-)
-plt.title('Average Price Across Different Genres and Categories', fontsize=16)
-plt.xlabel('Categories', fontsize=12)
-plt.ylabel('Genres', fontsize=12)
-plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better visibility
-plt.tight_layout()
-plt.show()
-
 #%% [markdown]
 # High-Priced Genres and Categories:
 #
